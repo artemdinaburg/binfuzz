@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html>
+<head>
+</head>
+<body>
+		<br/>
+		This file demos features of Binfuzz.js that are mentioned in the Blackhat Arsenal 2013 slides.
+		<br/>
+		Please view source to see the interesting bits.
+		<br/>
+		<textarea id="textlog" style="width: 80%; height: 200px; display: block; margin-left: auto; margin-right: auto;"></textarea>
+		<div id="log"></div>
+		<script language="JavaScript" src="../base64.js"></script>
+		<script language="JavaScript" src="../BinaryParser.js"></script>
+		<script language="JavaScript">
+		<!--
+				Math['oldrandom'] = Math.random;
+		-->
+		</script>
+		<script language="JavaScript" src="../seedrandom-min.js"></script>
+		<script language="JavaScript" src="../binfuzz.js"></script>
+		<script language="JavaScript">
+		<!--
+				if (!window.btoa) window.btoa = base64.encode;
+		    if (!window.atob) window.atob = base64.decode;
+
+
+				function myLog(msg)
+				{
+						var val = document.getElementById('textlog').value;
+						document.getElementById('textlog').value =  val + msg + "\n";
+				}
+
+
+				// demo1
+				// Nested Structures
+				//
+				// struct inner {
+		    //   uint16_t foo;
+				//   char bar[12];
+				// };
+				// struct outer {
+				//   uint32_t magic;
+				//   struct inner in;
+				// };
+		 function doDemo1() {
+				var outer = new Container({'name': 'outer'});
+				var inner = new Container(
+								{'root': outer, 'name': 'inner'});
+						inner.addChild( new UInt16(
+								{'root': outer, 'name': 'foo'} ));
+
+				    inner.addChild( new Blob(
+								{'root': outer, 'name': 'bar',
+								 'length': 12}));
+
+				outer.addChild( new UInt32 (
+						{'root': outer, 'name': 'magic',
+						 'constant': 0xDEADBEEF} ));
+				outer.addChild( inner );
+
+				myLog('Demo1: Nested Structures');
+				myLog('outer size: ' + outer.Size());
+				myLog('outer Combos: ' + outer.Combos());
+		}
+		doDemo1();
+
+		// struct counted {
+		//   uint16_t num_foos;
+		//   uint16_t foo[1];
+		// };
+		function doDemo2() {
+				var counted = new Container({'name': 'counted'});
+				counted.addChild( new UInt16(
+				  {'root': counted,
+				   'name': 'num_foos'}));
+				var foo_array = new ArrayContainer(
+					{'root': counted,
+					 'name': 'foo',
+					 'count': 'counted.num_foos'});
+			  foo_array.addChild(new UInt16({
+					 'root': counted,
+					 'name': 'dummy'}));
+				counted.addChild(foo_array);
+				myLog('Demo2: Counted Arrays');
+				myLog('Demo2 Combos: ' + counted.Combos());
+		}
+		doDemo2();
+
+		// struct big_blob {
+		//   uint32_t bsize;
+		//   char b[1];
+		// };
+    // string is 'bsize' 
+		// characters long
+
+		function getRandomNumber(max) {
+		  var rando = Math.floor(Math.random() * (max));
+			return rando;
+		}
+
+		function doDemo3() {
+			var big_blob = new Container({'name': 'bigblob'});
+			big_blob.addChild( new IntSize({
+				  'root': big_blob,
+					'name': 'bsize',
+					'bytesize': 4, 
+					'target': big_blob}));
+			big_blob.addChild( new Blob({
+				'root': big_blob,
+				'name': 'b',
+				'generator': makeRandomString,
+				'length': function (seed, parent, root) 
+						{ return getRandomNumber(1024) } }));
+				myLog('Demo3: Length Counters');
+				myLog('Demo3 Combos: ' + big_blob.Combos());
+		}
+		doDemo3();
+
+		function doDemo4(combo) {
+				var counted = new Container({'name': 'counted'});
+				counted.addChild( new UInt16(
+				  {'root': counted,
+				   'name': 'num_foos'}));
+				var foo_array = new ArrayContainer(
+					{'root': counted,
+					 'name': 'foo',
+					 'count': 'counted.num_foos'});
+			  foo_array.addChild(new UInt16({
+					 'root': counted,
+					 'name': 'dummy'}));
+				counted.addChild(foo_array);
+				counted.Distribute(combo,0);
+				return counted;
+	  }
+		var cbtest = doDemo4(0);
+		myLog('Demo4: Combinatorics');
+		myLog('Demo4 Combos: ' + cbtest.Combos());
+		myLog("Demo4 Size of Combo 0" + ": " + cbtest.Size());
+		cbtest = doDemo4(6);
+		myLog("Demo4 Size of Combo 6" + ": " + cbtest.Size());
+
+		function doDemo5(combo) {
+				var offsets = new Container({'name': 'offsets'});
+				offsets.addChild( new UInt16(
+				  {'root': offsets,
+				   'name': 'num_foos'}));
+				var foo_array = new ArrayContainer(
+					{'root': offsets,
+					 'name': 'foo',
+					 'count': 'offsets.num_foos'});
+			  foo_array.addChild(new UInt16({
+					 'root': offsets,
+					 'name': 'dummy'}));
+				offsets.addChild(foo_array);
+				offsets.addChild(new IntOffset({
+						'root': offsets,
+						'name': 'f_offset',
+						'bytesize': 4,
+						'target': 'offsets.f_offset'}));
+				offsets.Distribute(combo,0);
+				return offsets;
+	  }
+		myLog('Demo5: File Offsets');
+		var offtest = doDemo5(1);
+		myLog("Demo5 Offset for Combo 1: " + offtest.getChild('f_offset').NativeValue());
+		offtest = doDemo5(4);
+		myLog("Demo5 Offset for Combo 4: " + offtest.getChild('f_offset').NativeValue());
+				
+		-->
+		</script>
+</body>
+</html>

@@ -1,0 +1,1662 @@
+<!DOCTYPE html>
+<html b:version='2' class='v2' dir='ltr'>
+<head>
+<meta http-equiv="X-UA-Compatible" content="IE=Edge;chrome=1">
+<meta content='width=1100' name='viewport'/>
+<meta content='text/html; charset=UTF-8' http-equiv='Content-Type'/>
+<meta content='true' name='MSSmartTagsPreventParsing'/>
+<!--[if IE]><script type="text/javascript" src="http://www.blogger.com/static/v1/jsbin/2846761551-ieretrofit.js"></script>
+<![endif]-->
+<!--[if IE]> <script> (function() { var html5 = ("abbr,article,aside,audio,canvas,datalist,details," + "figure,footer,header,hgroup,mark,menu,meter,nav,output," + "progress,section,time,video").split(','); for (var i = 0; i < html5.length; i++) { document.createElement(html5[i]); } try { document.execCommand('BackgroundImageCache', false, true); } catch(e) {} })(); </script> <![endif]-->
+<title>binfuzz.js</title>
+<script type="text/javascript">
+if (navigator.userAgent.indexOf('MSIE 6') == -1) {
+  WebFontConfig = {
+    google: { families: [ 'Consolas' ],
+    api: 'http://themes.googleusercontent.com/fonts/css?kit=P1v597nURF-2-CuWR08nQw'
+    },
+    loading: function() {
+      if (window.jstiming) window.jstiming.load.tick('webfontLoading');
+    },
+    active: function() {
+      if (window.jstiming) window.jstiming.load.tick('webfontActive');
+    }
+  };
+  (function() {
+    var wf = document.createElement('script');
+    wf.src = '//ajax.googleapis.com/ajax/libs/webfont/1/webfont.js';
+    wf.type = 'text/javascript';
+    wf.async = 'true';
+    var s = document.getElementsByTagName('script')[0];
+    s.parentNode.insertBefore(wf, s);
+  })();
+} else {
+  document.documentElement.className = 'wf-inactive';
+}
+</script>
+<style type="text/css">
+.wf-inactive .header h1, .wf-consolas-n4-loading .header h1, .wf-consolas-n4-inactive .header h1 {
+  font-family: sans-serif;
+}
+</style>
+<link type='text/css' rel='stylesheet' href='widget_css_2_bundle.css' />
+<style id='page-skin-1' type='text/css'><!--
+body {
+font: normal normal 16px Arial, Tahoma, Helvetica, FreeSans, sans-serif;
+color: #cccccc;
+background: #292929 none repeat scroll top left;
+padding: 0 40px 40px 40px;
+}
+html body .region-inner {
+min-width: 0;
+max-width: 100%;
+width: auto;
+}
+h2 { font-size: 28px; }
+h3 { font-size: 24px; }
+h4 { font-size: 20px; }
+a:link {
+text-decoration:none;
+color: #dd7700;
+}
+a:visited {
+text-decoration:none;
+color: #cc6600;
+}
+a:hover {
+text-decoration:underline;
+color: #cc6600;
+}
+.body-fauxcolumn-outer .fauxcolumn-inner {
+background: transparent none repeat scroll top left;
+_background-image: none;
+}
+.body-fauxcolumn-outer .cap-top {
+position: absolute;
+z-index: 1;
+height: 400px;
+width: 100%;
+background: #292929 none repeat scroll top left;
+}
+.body-fauxcolumn-outer .cap-top .cap-left {
+width: 100%;
+background: transparent none repeat-x scroll top left;
+_background-image: none;
+}
+.content-outer {
+-moz-box-shadow: 0 0 40px rgba(0, 0, 0, .15);
+-webkit-box-shadow: 0 0 5px rgba(0, 0, 0, .15);
+-goog-ms-box-shadow: 0 0 10px #333333;
+box-shadow: 0 0 40px rgba(0, 0, 0, .15);
+margin-bottom: 1px;
+}
+.content-inner {
+padding: 10px 10px;
+}
+.content-inner {
+background-color: #333333;
+}
+/* Header
+----------------------------------------------- */
+.header-outer {
+background: transparent none repeat-x scroll 0 -400px;
+_background-image: none;
+}
+.Header h1 {
+font: normal normal 60px Consolas;
+color: #ffffff;
+text-shadow: -1px -1px 1px rgba(0, 0, 0, .2);
+}
+.Header h1 a {
+color: #ffffff;
+}
+.Header .description {
+font-size: 140%;
+color: #aaaaaa;
+}
+.header-inner .Header .titlewrapper {
+padding: 22px 30px;
+}
+.header-inner .Header .descriptionwrapper {
+padding: 0 30px;
+}
+/* Tabs
+----------------------------------------------- */
+.tabs-inner .section:first-child {
+border-top: 1px solid #404040;
+}
+.tabs-inner .section:first-child ul {
+margin-top: -1px;
+border-top: 1px solid #404040;
+border-left: 0 solid #404040;
+border-right: 0 solid #404040;
+}
+.tabs-inner .widget ul {
+background: #222222 none repeat-x scroll 0 -800px;
+_background-image: none;
+border-bottom: 1px solid #404040;
+margin-top: 0;
+margin-left: -30px;
+margin-right: -30px;
+}
+.tabs-inner .widget li a {
+display: inline-block;
+padding: .6em 1em;
+font: normal normal 16px Arial, Tahoma, Helvetica, FreeSans, sans-serif;
+color: #999999;
+border-left: 1px solid #333333;
+border-right: 0 solid #404040;
+}
+.tabs-inner .widget li:first-child a {
+border-left: none;
+}
+.tabs-inner .widget li.selected a, .tabs-inner .widget li a:hover {
+color: #ffffff;
+background-color: #000000;
+text-decoration: none;
+}
+/* Columns
+----------------------------------------------- */
+.main-outer {
+border-top: 0 solid #404040;
+}
+.fauxcolumn-left-outer .fauxcolumn-inner {
+border-right: 1px solid #404040;
+}
+.fauxcolumn-right-outer .fauxcolumn-inner {
+border-left: 1px solid #404040;
+}
+/* Headings
+----------------------------------------------- */
+h2 {
+margin: 0 0 1em 0;
+font: normal bold 11px Arial, Tahoma, Helvetica, FreeSans, sans-serif;
+color: #ffffff;
+text-transform: uppercase;
+}
+/* Widgets
+----------------------------------------------- */
+.widget .zippy {
+color: #999999;
+text-shadow: 2px 2px 1px rgba(0, 0, 0, .1);
+}
+.widget .popular-posts ul {
+list-style: none;
+}
+/* Posts
+----------------------------------------------- */
+.date-header span {
+background-color: transparent;
+color: #cccccc;
+padding: inherit;
+letter-spacing: inherit;
+margin: inherit;
+}
+.main-inner {
+padding-top: 30px;
+padding-bottom: 30px;
+}
+.main-inner .column-center-inner {
+padding: 0 15px;
+}
+.main-inner .column-center-inner .section {
+margin: 0 15px;
+}
+.post {
+margin: 0 0 25px 0;
+}
+h3.post-title, .comments h4 {
+font: normal normal 30px Arial, Tahoma, Helvetica, FreeSans, sans-serif;
+margin: .75em 0 0;
+}
+.post-body {
+font-size: 110%;
+line-height: 1.4;
+position: relative;
+}
+.post-body img, .post-body .tr-caption-container, .Profile img, .Image img,
+.BlogList .item-thumbnail img {
+padding: 0;
+background: #111111;
+border: 1px solid #111111;
+-moz-box-shadow: 1px 1px 5px rgba(0, 0, 0, .1);
+-webkit-box-shadow: 1px 1px 5px rgba(0, 0, 0, .1);
+box-shadow: 1px 1px 5px rgba(0, 0, 0, .1);
+}
+.post-body img, .post-body .tr-caption-container {
+padding: 1px;
+}
+.post-body .tr-caption-container {
+color: #cccccc;
+}
+.post-body .tr-caption-container img {
+padding: 0;
+background: transparent;
+border: none;
+-moz-box-shadow: 0 0 0 rgba(0, 0, 0, .1);
+-webkit-box-shadow: 0 0 0 rgba(0, 0, 0, .1);
+box-shadow: 0 0 0 rgba(0, 0, 0, .1);
+}
+.post-header {
+margin: 0 0 1.5em;
+line-height: 1.6;
+font-size: 90%;
+}
+.post-footer {
+margin: 20px -2px 0;
+padding: 5px 10px;
+color: #888888;
+background-color: #303030;
+border-bottom: 1px solid #444444;
+line-height: 1.6;
+font-size: 90%;
+}
+#comments .comment-author {
+padding-top: 1.5em;
+border-top: 1px solid #404040;
+background-position: 0 1.5em;
+}
+#comments .comment-author:first-child {
+padding-top: 0;
+border-top: none;
+}
+.avatar-image-container {
+margin: .2em 0 0;
+}
+#comments .avatar-image-container img {
+border: 1px solid #111111;
+}
+/* Accents
+---------------------------------------------- */
+.section-columns td.columns-cell {
+border-left: 1px solid #404040;
+}
+.blog-pager {
+background: transparent none no-repeat scroll top center;
+}
+.blog-pager-older-link, .home-link,
+.blog-pager-newer-link {
+background-color: #333333;
+padding: 5px;
+}
+.footer-outer {
+border-top: 0 dashed #bbbbbb;
+}
+/* Mobile
+----------------------------------------------- */
+body.mobile  {
+background-size: auto;
+}
+.mobile .body-fauxcolumn-outer {
+background: transparent none repeat scroll top left;
+}
+.mobile .body-fauxcolumn-outer .cap-top {
+background-size: 100% auto;
+}
+.mobile .content-outer {
+-webkit-box-shadow: 0 0 3px rgba(0, 0, 0, .15);
+box-shadow: 0 0 3px rgba(0, 0, 0, .15);
+padding: 0 40px;
+}
+body.mobile .AdSense {
+margin: 0 -40px;
+}
+.mobile .tabs-inner .widget ul {
+margin-left: 0;
+margin-right: 0;
+}
+.mobile .post {
+margin: 0;
+}
+.mobile .main-inner .column-center-inner .section {
+margin: 0;
+}
+.mobile .date-header span {
+padding: 0.1em 10px;
+margin: 0 -10px;
+}
+.mobile h3.post-title {
+margin: 0;
+}
+.mobile .blog-pager {
+background: transparent none no-repeat scroll top center;
+}
+.mobile .footer-outer {
+border-top: none;
+}
+.mobile .main-inner, .mobile .footer-inner {
+background-color: #333333;
+}
+.mobile-index-contents {
+color: #cccccc;
+}
+.mobile-link-button {
+background-color: #dd7700;
+}
+.mobile-link-button a:link, .mobile-link-button a:visited {
+color: #ffffff;
+}
+.mobile .tabs-inner .section:first-child {
+border-top: none;
+}
+.mobile .tabs-inner .PageList .widget-content {
+background-color: #000000;
+color: #ffffff;
+border-top: 1px solid #404040;
+border-bottom: 1px solid #404040;
+}
+.mobile .tabs-inner .PageList .widget-content .pagelist-arrow {
+border-left: 1px solid #404040;
+}
+.tabs-inner .PageList li a {border-right:1px solid grey;}
+.Header h1 {margin-bottom:0;}
+.Header .description {margin-top: 0;}
+.header-inner .Header .titlewrapper {padding-left: 0; padding-bottom:0;}
+.Attribution {visibility: hidden;}
+--></style>
+<style id='template-skin-1' type='text/css'><!--
+body {
+min-width: 960px;
+}
+.content-outer, .content-fauxcolumn-outer, .region-inner {
+min-width: 960px;
+max-width: 960px;
+_width: 960px;
+}
+.main-inner .columns {
+padding-left: 0px;
+padding-right: 0px;
+}
+.main-inner .fauxcolumn-center-outer {
+left: 0px;
+right: 0px;
+/* IE6 does not respect left and right together */
+_width: expression(this.parentNode.offsetWidth -
+parseInt("0px") -
+parseInt("0px") + 'px');
+}
+.main-inner .fauxcolumn-left-outer {
+width: 0px;
+}
+.main-inner .fauxcolumn-right-outer {
+width: 0px;
+}
+.main-inner .column-left-outer {
+width: 0px;
+right: 100%;
+margin-left: -0px;
+}
+.main-inner .column-right-outer {
+width: 0px;
+margin-right: -0px;
+}
+#layout {
+min-width: 0;
+}
+#layout .content-outer {
+min-width: 0;
+width: 800px;
+}
+#layout .region-inner {
+min-width: 0;
+width: auto;
+}
+--></style>
+</head>
+<body class='loading'>
+
+<!-- keep! -->
+<div class='navbar section' id='navbar'>
+</div>
+<!-- keep! -->
+
+<div class='content'>
+<div class='content-outer'>
+<div class='fauxborder-left content-fauxborder-left'>
+<div class='content-inner'>
+<header>
+<div class='header-outer'>
+<div class='fauxborder-left header-fauxborder-left'>
+<div class='region-inner header-inner'>
+<div class='header section' id='header'><div class='widget Header' id='Header1'>
+<div id='header-inner'>
+<div class='titlewrapper'>
+<h1 class='title'>
+<a href='http://dinaburg.org/binfuzz'>binfuzz.js</a>
+</h1>
+</div>
+<div class='descriptionwrapper'>
+<p class='description'><span>... a binary data fuzzer in JavaScript <span></p>
+</div>
+</div>
+</div></div>
+</div>
+</div>
+</div>
+</header>
+<div class='main-outer'>
+<div class='fauxborder-left main-fauxborder-left'>
+<div class='region-inner main-inner'>
+<div class='columns fauxcolumns'>
+<!-- corrects IE6 width calculation -->
+<div class='columns-inner'>
+<div class='column-center-outer'>
+<div class='column-center-inner'>
+<div class='main section' id='main'><div class='widget Blog' id='Blog1'>
+<div class='blog-posts hfeed'>
+<div class='post-outer'>
+<div class='post hentry' itemscope='itemscope' itemtype='http://schema.org/BlogPosting'>
+<div class='post-body entry-content' itemprop='articleBody'>
+		<div dir="ltr" style="text-align: left;" trbidi="on">
+
+<h1>Fuzzing in the Browser</h1>
+This live example will fuzz Windows ICO files in your browser. The fuzzing (eventually) crashes Safari, and makes Mobile Safari (the iPhone browser) close due to low memory. Starting fuzzing will definitely result in <a href="http://en.wikipedia.org/wiki/Garbage_collection_(computer_science)">slowdown</a>. The commented code for this example is at <a href="#examplecode">the end of the page</a>.
+<br/>
+<div style="border: 2px solid black; padding: 4px">
+        <div style="border: 2px solid red; font-weight: bold; text-align: center; padding:15px 0px 15px 0px; background-repeat: no-repeat; background-position: center; color: #9F6000; background-color: #FEEFB3; ">
+            Warning: Clicking 'Start Fuzzing' may crash your browser. It will definitely make your browser gobble up gigabytes of memory. 
+            <br/>
+            But you should still do it, because breaking things is awesome.
+        </div>
+		<br/>
+        <div style="text-align: center;">
+		    <input style="display: inline-block; margin-left: auto; margin-right: auto;font:32px arial,sans-serif;" type="button" value="Start Fuzzing" onclick="should_fuzz = true; fuzzAnIcon();" />
+		    <input style="display: inline-block; margin-left: auto; margin-right: auto;font:32px arial,sans-serif;" type="button" value="Stop Fuzzing" onclick="should_fuzz = false;" />
+        </div>
+        <br/>
+        <div style="text-align: center;">
+            The Currently Fuzzing Icon:
+        </div>
+        <br/>
+		<canvas width="128" height="128" style="border: 1px solid black; width: 128px; height: 128px; display: block; margin-left: auto; margin-right: auto;" id="iconpreview"></canvas>
+        <div style="text-align: center;">
+            (note: this may be blank for a while, most fuzzed icons are invalid by definition)
+        </div>
+		<br/>
+        <div style="text-align: left; width: 80%; display: block; margin-left: auto; margin-right: auto;">
+            <label for="textlog">This is a log of what the fuzzer is doing. If text is scrolling, its running.</label>
+            <br/>
+		    <textarea id="textlog" style="width: 100%; height: 200px"></textarea>
+        </div>
+</div>
+
+<!-- Base64 conversion for browsers that don't support it -->
+<script language="JavaScript" src="../base64.js"></script>
+<!-- Convert binary values to a packed string -->
+<script language="JavaScript" src="../BinaryParser.js"></script>
+<!-- Use a seeded random generator, but keep a reference to the builtin Math.random -->
+<script language="JavaScript">
+<!--
+		Math['oldrandom'] = Math.random;
+        should_fuzz = true;
+-->
+</script>
+<script language="JavaScript" src="../seedrandom-min.js"></script>
+<!-- The Binfuzz.js script -->
+<script language="JavaScript" src="../binfuzz.js"></script>
+<script language="JavaScript">
+<!--
+// If the browser doesn't support native base64
+// then use base64.js version.
+if (!window.btoa) window.btoa = base64.encode;
+if (!window.atob) window.atob = base64.decode;
+
+// Create a new link element to dynamically update the
+// favicon for this browser tab
+function changeFavicon(src) {
+    document.head || (document.head = document.getElementsByTagName('head')[0]);
+    var link = document.createElement('link'),
+        oldLink = document.getElementById('dynamic-favicon');
+    link.id = 'dynamic-favicon';
+    link.rel = 'icon';
+    link.href = src;
+    if (oldLink) {
+        document.head.removeChild(oldLink);
+    }
+    document.head.appendChild(link);
+}
+
+// Draw this icon file in a canvas element
+function drawPreview(datalink) {
+    var canvas = document.getElementById('iconpreview');
+    context = canvas.getContext('2d');
+
+    var oldw = canvas.width;
+    // clear the old icon in the canvas by changing the width
+    // and re-setting it
+    canvas.width = 1;
+    canvas.width = oldw;
+
+    // create an Image from the base64 data:// URL
+    // that represents the icon
+    icon_preview = new Image();
+    icon_preview.src = datalink;
+    icon_preview.onload = function() {
+        console.log("drawing image");
+        try {
+            // The image has been parsed, draw it on the canvas
+            context.drawImage(icon_preview, 128/2-8, 128/2-8);
+            delete this.src;
+        } catch (err) {
+            // could not draw the image
+            console.log("could not draw image");
+        }
+        // do the next image
+        setTimeout('fuzzAnIcon()', 500);	
+    };
+    icon_preview.onerror = function() {
+        // There was a failure parsing the image; try the next
+        setTimeout('fuzzAnIcon()', 500);	
+    };
+}
+
+// a simple logger to write log data to a text box
+function myLog(msg)
+{
+    var val = document.getElementById('textlog').value;
+    document.getElementById('textlog').value =  msg + "\n" + val;
+}
+
+
+// defines the icon structure and then creates a new icon
+// based on the structure definition.
+function makeNewIcon() {
+    // this is the overall container; it is needed
+    // since icons include two structures that reference 
+    // each other
+    var ICON = new Container({'name': 'ICON'});
+
+    // this is the actual bitmap information
+    // as defined in a windows bitmap. 
+    // See:
+    // http://msdn.microsoft.com/en-us/library/windows/desktop/dd183376(v=vs.85).aspx
+    var tagBITMAPINFOHEADER = new Container(
+        {'root': ICON,
+        'name': 'tagBITMAPINFOHEADER'}
+        );
+
+    // The IntSize element is used for sizes
+    // of other structures
+
+    // this is the size of the tagBITMAPINFOHEADER structure
+    // the 'target' is the struture itself, 
+    // and its size will be automatically 
+    // calculated. This element is not fuzzed
+    tagBITMAPINFOHEADER.addChild( new IntSize(
+        {'root': ICON,
+        'name': 'biSize',
+        'bytesize': 4, 
+        'nofuzz': true,
+        'signed': true,
+        'target': tagBITMAPINFOHEADER}
+        ));
+
+    // the width of the bitmap; takes on one of
+    // the values in 'values'
+    tagBITMAPINFOHEADER.addChild( new Int32(
+        {'root': ICON,
+        'name': 'biWidth', 
+        'values': [0, 1, 3, 16, 32, 64, 129, 0xFF, 0xFFF, 0xFFFE, 0xFFFF]}
+        ));
+
+    // the height of the bitmap; takes on one of
+    // the values in 'values'
+    tagBITMAPINFOHEADER.addChild( new Int32(
+        {'root': ICON,
+         'name': 'biHeight',
+        'values': [0, 1, 3, 16, 32, 64, 129, 0x101, 0x1001, 0xFFFE, 0xFFFF]}
+     ));
+
+    // the number of planes. This defaults to 1, but
+    // other values will be selected as fuzzing proceeds
+    tagBITMAPINFOHEADER.addChild( new UInt16(
+        {'root': ICON,
+        'name': 'biPlanes',
+        'default': 1}
+    ));
+
+    // the choices for the color depth
+    tagBITMAPINFOHEADER.addChild( new UInt16(
+        {'root': ICON,
+         'name': 'biBitCount',
+         'values': [1,2,4,8,16,24,32]}
+    ));
+
+    // Documented compression values
+    tagBITMAPINFOHEADER.addChild( new UInt32(
+        {'root': ICON,
+         'name': 'biCompression',
+         'values': [0,1,2,3,6]}
+    ));
+
+    // This is the size of the image.
+    // As we are generating images, we don't have image data a-priori
+    // We need to know how much data to generate.
+    // 
+    // The size is calculated based on the width, height, planes, and bpp
+    // There are alignment issues that make this a bit complicated
+    tagBITMAPINFOHEADER.addChild( new IntSize(
+        {'root': ICON,
+        'name': 'biSizeImage',
+        'bytesize': 4,
+        'nofuzz': true,
+        'signed': true,
+        'target': tagBITMAPINFOHEADER,
+        'calcfunc': function(target, combo) {
+            var width = target.getChild('biWidth').NativeValue();	
+            var height = target.getChild('biHeight').NativeValue();
+            var planes = target.getChild('biPlanes').NativeValue();
+            var bpp = target.getChild('biBitCount').NativeValue();
+
+            // size of OR mask
+            var tmp1 = width * planes * bpp + 31;
+            var tmp2 = (tmp1 & ~31) / 8;
+            var tmp3 = tmp2 * height / 2;
+
+            // size of AND mask
+            var and1 = width * planes * 1 + 31;
+            var and2 = (and1 & ~31) / 8;
+            var and3 = and2 * height / 2;
+
+            tmp3 += and3;
+
+            return tmp3;
+            }
+        }
+    ));
+
+    // these are values that are ignored
+    // according to the documentation, and
+    // are therefore set to a constant value
+    tagBITMAPINFOHEADER.addChild( new Int32(
+        {'root': ICON,
+        'name': 'biXPelsPerMeter',
+        'constant': 0}
+    ));
+    tagBITMAPINFOHEADER.addChild( new Int32(
+        {'root': ICON,
+        'name': 'biYPelsPerMeter',
+        'constant': 0}
+    ));
+    tagBITMAPINFOHEADER.addChild( new UInt32(
+        {'root': ICON,
+        'name': 'biClrUsed',
+        'constant': 0}
+    ));
+    tagBITMAPINFOHEADER.addChild( new UInt32(
+        {'root': ICON,
+        'name': 'biClrImportant',
+        'constant': 0}
+    ));
+
+    // an icon is composed of many images
+    // While they can technically be all different
+    // we compromise expression for ease of 
+    // implementation here.
+    // 
+    // We use an array of the same icon, but
+    // the size of the array can vary
+    // 
+    var ICONIMAGE = new ArrayContainer(
+        {'root': ICON,
+         'name': 'ICONIMAGE',
+         'count': 'ICON.ICONDIR.idCount'}
+    );
+
+    // this array will have a bitmapinfoheader
+    ICONIMAGE.addChild(tagBITMAPINFOHEADER);
+
+    // this is an optional field that I currently
+    // do not implement. This field is used in
+    // some color depth icons though.
+    ICONIMAGE.addChild(new Blob(
+        {'root': ICON,
+         'name': 'icColors',
+         'length': 0,
+         'blob': ""}
+    ));
+
+    // this is the icon XOR mask.
+    // Like the actual image data, we do not know it a priori
+    // since we generate new icons. Also like the image data,
+    // the size of the XOR mask is based on the width, height
+    // planes, and color depth
+    //
+    // There is a sanity check to avoid generating gigabytes of
+    // icon data. This script uses too much memory as is.
+    ICONIMAGE.addChild(new Blob(
+        {'root': ICON,
+         'name': 'icXOR',
+         'generator': makeRandomString,
+         'length': function (seed, parent, root) {
+                var width = parent.getChild('tagBITMAPINFOHEADER').getChild('biWidth').NativeValue();
+                var height = parent.getChild('tagBITMAPINFOHEADER').getChild('biHeight').NativeValue() / 2;
+                var bpp = parent.getChild('tagBITMAPINFOHEADER').getChild('biBitCount').NativeValue();
+                var planes = parent.getChild('tagBITMAPINFOHEADER').getChild('biPlanes').NativeValue();
+
+                var stride = (( width * planes * bpp + 31) & ~31) / 8;
+                var thislen = stride * height;
+                
+                var blobsize = thislen;
+                // sanity check. we are not about to generate gigabytes of
+                // icon data
+                if(blobsize < 0 || blobsize > 0xFFFFF) {
+                        blobsize = 0xFFFFF;
+                }
+                return blobsize;
+                }
+        }
+    ));
+
+    // this is just like the XOR mask, but the size is different
+    // since there the AND mask does not depend on color depth
+    ICONIMAGE.addChild(new Blob(
+        {'root': ICON,
+        'name': 'icAND',
+         'generator': makeRandomString,
+         'length': function (seed, parent, root)
+         {
+            var width = parent.getChild('tagBITMAPINFOHEADER').getChild('biWidth').NativeValue();
+            var height = parent.getChild('tagBITMAPINFOHEADER').getChild('biHeight').NativeValue() / 2;
+            var planes = parent.getChild('tagBITMAPINFOHEADER').getChild('biPlanes').NativeValue();
+
+
+            var stride = (( width * planes * 1 + 31) & ~31) / 8;
+            var thislen = stride * height;
+
+            // sanity check. we are not about to generate gigabytes of
+            // icon data, even if I really want to
+            if(thislen < 0 || thislen > 0xFFFFF) {
+                    thislen = 0xFFFFF;
+            }
+            return thislen;
+         } 
+         }
+    ));
+
+
+    // The array of icon metadata is stored separately
+    // from the bitmap data, but they need to have 
+    // some kind of link with each other.
+    // 
+    // That is one of the reasons each entry
+    // is named. Entries can be referenced by
+    // name, including arrays. 
+    // 
+    // The 'indexer' value of the array is a token
+    // that will be replaced by the array index when
+    // it is used in children. 
+    // 
+    var ICONDIRENTRY = new ArrayContainer(
+        {'root': ICON,
+         'name': 'idEntries',
+         'count': 'ICON.ICONDIR.idCount',
+         'indexer': '%n'}
+    );
+
+    // the width as defined by icon metadata
+    // Yes, a width is specified both in the bitmapinfo
+    // and here. Assume 16 by default
+    ICONDIRENTRY.addChild(new Int8(
+            {'root': ICON,
+            'name': 'bWidth',
+            'default': 16 }
+    ));
+
+    // same as above, but height
+    ICONDIRENTRY.addChild(new Int8(
+            {'root': ICON,
+            'name': 'bHeight',
+            'default': 16 }
+    ));
+
+    // these elements are unused and
+    // hence set to constant values
+    ICONDIRENTRY.addChild(new Int8(
+            {'root': ICON,
+             'name': 'bColorCount',
+             'constant': 0}
+    ));
+
+    ICONDIRENTRY.addChild(new Int8(
+            {'root': ICON,
+             'name': 'bReserved',
+             'constant': 0}
+    ));
+    
+    // the number of bitmap planes
+    // in this icon image
+    ICONDIRENTRY.addChild(new Int16(
+            {'root': ICON,
+             'name': 'wPlanes',
+             'default': 1}
+    ));
+    
+    // the color depth of the icon.
+    // once again, this duplicates 
+    // what is specified in the bitmap info
+    ICONDIRENTRY.addChild(new Int16(
+            {'root': ICON,
+             'name': 'wBitCount',
+             'values': [1,2,4,8,16,24,32]}
+    ));
+
+    // the size of an icon metadata entry.
+    // This references an array entry of the
+    // icon image array.
+    // The %n in the target will be expanded to the 
+    // array element that we are calculating the 
+    // target of
+    ICONDIRENTRY.addChild(new IntSize(
+            {'root': ICON,
+             'name': 'dwBytesInRes',
+             'nofuzz': true,
+             'bytesize': 4,
+             'target': "ICON.ICONIMAGE[%n]"}
+    ));
+
+    // This is where the image data will be 
+    // located in the file. 
+    // The IntOffset type is used to calculate
+    // field offsets in relation to all of the
+    // other fields.
+    ICONDIRENTRY.addChild(new IntOffset(
+            {'root': ICON,
+             'name': 'dwImageOffset',
+             'nofuzz': true,
+             'bytesize': 4,
+             'target': "ICON.ICONIMAGE[%n]"}
+    ));
+
+    // the icon directory entry
+    var ICONDIR = new Container(
+        {'root': ICON,
+         'name': 'ICONDIR'}
+        );
+
+    // a reserved magic number, set 
+    // to zero
+    ICONDIR.addChild( new Int16(
+        {'root': ICON,
+         'name': 'idReserved',
+         'constant': 0}
+    ));
+
+    // the type of icon. The type 1
+    // is reserved for icons
+    ICONDIR.addChild( new Int16(
+            {'root': ICON,
+             'name': 'idType',
+             'constant': 1}
+    ));
+
+    // how many images are in this icon file?
+    ICONDIR.addChild( new Int16(
+            {'root': ICON,
+             'name': 'idCount',
+             'values': [1, 64, 0xFF, 0xFFF]}
+    ));
+
+    // link all the structures to the top level
+    // container
+    ICONDIR.addChild(ICONDIRENTRY);
+    ICON.addChild(ICONDIR);
+    ICON.addChild(ICONIMAGE);
+
+    // icon struture is ready
+    return ICON;
+} // makeNewIcon
+
+
+function fuzzAnIcon(fuzzesBeforeReload, specificCombo) {
+
+    if(should_fuzz === false) {
+        return;
+    }
+
+    // Get an icon structure definition
+    var icon = makeNewIcon();
+    // How many combinations are there?
+    var combos = icon.Combos();
+    myLog("icon Combos: " + combos);
+    // pick a random combination to instantiate
+    var randcombo = Math.floor(Math.oldrandom() * (combos));
+
+    // this is here in case this code would be needed
+    // to reproduce a specific fuzz case
+    if(specificCombo === undefined)
+    {
+        myLog("Trying combo: " + randcombo);
+        icon.Distribute(randcombo, 0);
+    }
+    else 
+    {
+        // the Distribute call populates each element of the
+        // icon structure with its combination number
+        myLog("Trying combo: " + specificCombo);
+        icon.Distribute(specificCombo, 0);
+    }
+
+    myLog("Icon Size: " + icon.Size());
+    console.log("About to calculate value");
+    // actually generate the data that correspons
+    // to the specific combination
+    var ic = icon.Value();
+    // and convert it to a base64 url
+    var iconb64 = "data:image/x-icon;base64," + window.btoa(ic);
+    ic = "";
+
+    // taken from:
+    // http://stackoverflow.com/questions/260857/changing-website-favicon-dynamically
+    //
+    drawPreview(iconb64);
+    // Google Chrome will kill the renderer process if a URL 
+    // length is > kMaxURLChars, which is 2MB in newer
+    // Chrome builds.
+    var is_chrome = /chrome/.test(navigator.userAgent.toLowerCase()); 
+    var kMaxURLChars = 2 * 1024 * 1024;
+    if(is_chrome && iconb64.length >= kMaxURLChars) {
+        myLog("Icon Would Kill Chrome Renderer, not setting...");
+    } else {
+        changeFavicon(iconb64);
+        myLog("Icon Set...");
+    }
+    iconb64 = "";
+    // This was my attempt at removing references to help garbage collectors
+    // make this script hog less memory
+    icon.HelpGC();
+
+    if(fuzzesBeforeReload === undefined) {
+        return;
+    }
+
+    // normally a new fuzz case will be run after an icon
+    // is rendered, or fails to render, but sometimes
+    // none of the callbacks will be called. This ensures
+    // that a new fuzz iteration restarts
+    if(fuzzesBeforeReload == 0) {
+        setTimeout('location.reload(true)', 2000);
+    } else {
+        fuzzesBeforeReload -= 1;
+        setTimeout('fuzzAnIcon(' + fuzzesBeforeReload.toString() + ')', 2000);
+    }
+}
+-->
+</script>
+<br/>
+<br/>
+<h1>About Binfuzz.js</h1>
+Binfuzz.js is a library for fuzzing structured binary data in JavaScript. Structured binary data is data that can be easily represented by one or more <a href="http://en.wikipedia.org/wiki/Struct_(C_programming_language)">C structures</a>. That is, the data is composed of fixed size fields, and any variable length fields are counted by another structure member. Examples of structured binary data include SSL, DNS, and most image formats. Things that aren't structured binary data include languages (such as HTML or JavaScript) or text-based protocols (such as HTTP) or text-based file formats (such as <a href="http://en.wikipedia.org/wiki/Portable_Document_Format">PDF</a>).
+<br/>
+<br/>
+Binfuzz.js uses the definition of a structure to create instances of the structure with invalid or edge-case values. The example on this page uses Binfuzz.js to generate <a href="http://msdn.microsoft.com/en-us/library/ms997636.aspx">Windows ICO</a> files to stress your browser's icon parsing and display code. All icon files are generated from the structural definition of an ICO file. Each ICO file contains many images of different sizes (<a href="http://msdn.microsoft.com/en-us/library/windows/desktop/aa511280.aspx#size">for optimal display on different resolutions</a>). Binfuzz.js will generate ICO files that try to break your browser's icon drawing code. Examples of invalid icons include icons with a size of -1 by -1, icons that claim they are composed of 64 images but ony provide data for one, icons that claim they have 16-bit color in one field but specify a 32-bit color in another field, and so on.
+<br/>
+<br/>
+
+<h1>A Crash Course in Fuzzing</h1>
+Imagine there was a <a href="http://windows.microsoft.com/en-us/windows7/products/features/paint">program that rendered pictures</a>. To exhaustively test the program, one would have to render every possible picture, which is impossible. Exhaustive testing could be approximated by picking a random set of pictures and rendering those. This approximation is possible, and might find some bugs. The more random pictures are selected, the closer the randomized test approximates the exhaustive test. This randomized input testing is called <a href="http://en.wikipedia.org/wiki/Fuzz_testing">fuzzing</a>. Fuzzing sidesteps the 'too many possibilities' problem by assuming that a random sample of possible inputs is sufficient to find faults in software.
+<br/>
+<br/>
+A fuzzer is a program that generates the random inputs. There are two main types: generative fuzzers and mutative fuzzer. A generative fuzzer will create new input, while a mutative fuzzer will mutate existing input. Binfuzz.js is a generative fuzzer. Most program will have checks on their inputs, such as <a href="https://en.wikipedia.org/wiki/File_format#Magic_number">magic numbers</a>, <a href="http://support.microsoft.com/kb/822061">length limits</a>, and <a href="http://stackoverflow.com/questions/6417707/what-is-bitmapdata-reserved">value restrictions</a>. Modern fuzzers try to create inputs that will pass these checks to increase <a href="https://en.wikipedia.org/wiki/Code_coverage">code coverage</a>, that is, stress more of the program under test. Binfuzz.js generates program inputs that are likely to be partially valid by using the supplied structure definition. Additionally, binfuzz.js supports custom calculation functions to accurately populate checksums or other values dependent on multiple fields or custom calculations.
+
+<br/>
+<br/>
+<h1>How does Binfuzz.js Work?</h1>
+Binfuzz.js instantiates a new structure from a structure definition. It was created for generating ICO files, but should operate on any structured data.
+<br/>
+<br/>
+
+Structure definitions are designed to be simple to specify. Below is a comparison of declaring a C structure (left), and declaring the same structure in Binfuzz.js (right).
+<br/>
+<br/>
+
+<div style="text-align: center;">
+
+<!-- HTML generated using hilite.me -->
+<div style="vertical-align: middle; display: inline-block;">
+C Representation
+<div style="background: #202020; text-align:left;margin:auto;overflow:auto;width:auto;border:solid black;padding:.2em .6em;">
+
+<pre style="margin: 0; line-height: 125%"><span style="color: #6ab825; font-weight: bold">struct</span> <span style="color: #d0d0d0">PDU</span> <span style="color: #d0d0d0">{</span>
+    <span style="color: #6ab825; font-weight: bold">uint32_t</span>      <span style="color: #d0d0d0">magic;</span>
+    <span style="color: #6ab825; font-weight: bold">uint8_t</span>       <span style="color: #d0d0d0">type;</span>
+    <span style="color: #6ab825; font-weight: bold">uint16_t</span>      <span style="color: #d0d0d0">size;</span>
+    <span style="color: #6ab825; font-weight: bold">char</span>          <span style="color: #d0d0d0">data[</span><span style="color: #3677a9">1</span><span style="color: #d0d0d0">];</span>
+<span style="color: #d0d0d0">};</span>
+</pre>
+
+</div>
+</div>
+
+<!-- HTML generated using hilite.me -->
+<div style="vertical-align: middle; display: inline-block;">
+Binfuzz.js Representation
+<div style="background: #202020; margin:auto; text-align:left; overflow:auto;width:auto;border:solid black;padding:.2em .6em;"><pre style="margin: 0; line-height: 125%"><span style="color: #6ab825; font-weight: bold">var</span> <span style="color: #d0d0d0">PDU</span> <span style="color: #d0d0d0">=</span> <span style="color: #6ab825; font-weight: bold">new</span> <span style="color: #d0d0d0">Container({</span>
+    <span style="color: #ed9d13">&#39;name&#39;</span><span style="color: #d0d0d0">:</span> <span style="color: #ed9d13">&#39;PDU&#39;</span>
+<span style="color: #d0d0d0">});</span>
+<span style="color: #d0d0d0">PDU.addChild(</span> <span style="color: #6ab825; font-weight: bold">new</span> <span style="color: #d0d0d0">Int32(</span>
+<span style="color: #d0d0d0">{</span>
+    <span style="color: #ed9d13">&#39;root&#39;</span><span style="color: #d0d0d0">:</span> <span style="color: #d0d0d0">PDU,</span>
+    <span style="color: #ed9d13">&#39;name&#39;</span><span style="color: #d0d0d0">:</span> <span style="color: #ed9d13">&#39;magic&#39;</span>
+<span style="color: #d0d0d0">}));</span>
+<span style="color: #d0d0d0">PDU.addChild(</span> <span style="color: #6ab825; font-weight: bold">new</span> <span style="color: #d0d0d0">Int8(</span>
+<span style="color: #d0d0d0">{</span>
+    <span style="color: #ed9d13">&#39;root&#39;</span><span style="color: #d0d0d0">:</span> <span style="color: #d0d0d0">PDU,</span>
+    <span style="color: #ed9d13">&#39;name&#39;</span><span style="color: #d0d0d0">:</span> <span style="color: #ed9d13">&#39;type&#39;</span>
+<span style="color: #d0d0d0">}));</span>
+<span style="color: #d0d0d0">PDU.addChild(</span> <span style="color: #6ab825; font-weight: bold">new</span> <span style="color: #d0d0d0">IntSize(</span>
+<span style="color: #d0d0d0">{</span>
+    <span style="color: #ed9d13">&#39;root&#39;</span><span style="color: #d0d0d0">:</span> <span style="color: #d0d0d0">PDU,</span>
+    <span style="color: #ed9d13">&#39;name&#39;</span><span style="color: #d0d0d0">:</span> <span style="color: #ed9d13">&#39;size&#39;</span><span style="color: #d0d0d0">,</span>
+    <span style="color: #ed9d13">&#39;bytesize&#39;</span><span style="color: #d0d0d0">:</span> <span style="color: #3677a9">2</span><span style="color: #d0d0d0">,</span>
+    <span style="color: #ed9d13">&#39;target&#39;</span><span style="color: #d0d0d0">:</span> <span style="color: #ed9d13">&#39;PDU.data&#39;</span>
+<span style="color: #d0d0d0">}));</span>
+<span style="color: #d0d0d0">PDU.addChild(</span><span style="color: #6ab825; font-weight: bold">new</span> <span style="color: #d0d0d0">Blob(</span>
+<span style="color: #d0d0d0">{</span>
+    <span style="color: #ed9d13">&#39;root&#39;</span><span style="color: #d0d0d0">:</span> <span style="color: #d0d0d0">PDU,</span>
+    <span style="color: #ed9d13">&#39;name&#39;</span><span style="color: #d0d0d0">:</span> <span style="color: #ed9d13">&#39;data&#39;</span><span style="color: #d0d0d0">,</span>
+    <span style="color: #ed9d13">&#39;generator&#39;</span><span style="color: #d0d0d0">:</span> <span style="color: #d0d0d0">makeRandomString</span>
+<span style="color: #d0d0d0">}));</span>
+</pre></div>
+</div>
+</div>
+
+<br/>
+<br/>
+Binfuzz.js includes support for:
+<ul>
+<li>Several types of elements (Int8, Int16, Int32 and Blob are already defined)</li>
+<li>Nested structures</li>
+<li>Arrays</li>
+<li>Counter Fields (e.g. field A = number of elements in Array B)</li>
+<li>Length Fields (e.g. field A = length of Blob B)</li>
+<li>File Offsets (e.g. field A = how far from the start of the file is Blob B?</li>
+<li>Custom population functions (e.g. field A = fieldB.length + fieldC.length)</li>
+</ul>
+The ICO fuzzing example includes uses of all of these because I needed them to implement ICO file generation. 
+<br/>
+<br/>
+
+<h1>Combinations</h1>
+Binfuzz.js calculates the total number of combinations based on how many possible combinations there are for each individual field. It is then possible to generate a structured data instance corresponding to a specific combination number. It is not necessary to generate prior combinations. This way random combinations can be selected when fuzzing run time is limited. 
+<br/>
+<br/>
+
+<h1>Why?</h1>
+The best way to learn is by doing, and I wanted to learn JavaScript. So I decided to create an ICO file fuzzer in JavaScript. I chose ICO files because of <a href="http://en.wikipedia.org/wiki/Favicon">favicon.ico</a>, a file browsers automatically request when navigating to a new page.
+<br/>
+<br/>
+Favicons are an especially interesting fuzzing target because they can expose vulnerabilities in the browser and the OS. Favicons can expose browser vulnerabilities when drawn via an <a href="http://www.w3.org/MarkUp/html3/img.html">IMG</a> tag or in a <a href="https://developer.mozilla.org/en-US/docs/HTML/Canvas/Tutorial">CANVAS element</a>, and favicons can expose OS vulnerabilities when set as a tab icon or menu icon. Loading favicons requires no user iteraction, because favicons are automatically fetched and drawn by your browser. Another benefit to fuzzing icons, and one that I had not considered before starting the project is that when fuzzing images, you can actually <b>see</b> the fuzzing working.
+<br/>
+<br/>
+After starting the project, I realized I got a lot more than I bargained for. Icons are a <a href="http://blogs.msdn.com/b/oldnewthing/archive/2010/10/18/10077133.aspx">surprisingly complex format that has evolved over time</a>. There are several images in one file, each image has corresponding metadata, there are internal fields that refer to offsets in the file, and the size of the icon data for each image depends the metadata. All of these interlinked reationships need to be described and processed by Binfuzz.js.
+<br/>
+<br/>
+<h1>Where?</h1>
+All code is available on Github.
+<br/>
+<br/>
+<h1 id="examplecode">ICO Fuzzing Example</h1> 
+Icons are a complex format, involving nested structures, arrays, and binary blobs. Some of the fields are derived from other fields, and a few fields of nested structures are linked together. The <a href="http://msdn.microsoft.com/en-us/library/ms997538.aspx">Microsoft documentation on ICO files</a> describes the interaction pretty well. Below is the documented code of the example on this page, to show how to use Binfuzz.js. 
+<br/>
+<br/>
+
+<!-- HTML generated using hilite.me -->
+<div style="background: #202020; overflow:auto;width:auto;border:2px solid black; padding:.2em .6em;">
+<pre style="margin: 0; line-height: 125%"><span style="color: #999999; font-style: italic">&lt;!-- Base64 conversion for browsers that don&#39;t support it --&gt;</span>
+<span style="color: #6ab825; font-weight: bold">&lt;script </span><span style="color: #bbbbbb">language=</span><span style="color: #ed9d13">&quot;JavaScript&quot;</span> <span style="color: #bbbbbb">src=</span><span style="color: #ed9d13">&quot;base64.js&quot;</span><span style="color: #6ab825; font-weight: bold">&gt;&lt;/script&gt;</span>
+<span style="color: #999999; font-style: italic">&lt;!-- Convert binary values to a packed string --&gt;</span>
+<span style="color: #6ab825; font-weight: bold">&lt;script </span><span style="color: #bbbbbb">language=</span><span style="color: #ed9d13">&quot;JavaScript&quot;</span> <span style="color: #bbbbbb">src=</span><span style="color: #ed9d13">&quot;BinaryParser.js&quot;</span><span style="color: #6ab825; font-weight: bold">&gt;&lt;/script&gt;</span>
+<span style="color: #999999; font-style: italic">&lt;!-- Use a seeded random generator, but keep a reference to the builtin Math.random --&gt;</span>
+<span style="color: #6ab825; font-weight: bold">&lt;script </span><span style="color: #bbbbbb">language=</span><span style="color: #ed9d13">&quot;JavaScript&quot;</span><span style="color: #6ab825; font-weight: bold">&gt;</span>
+    <span style="color: #999999; font-style: italic">&lt;!--</span>
+        <span style="color: #24909d">Math</span><span style="color: #d0d0d0">[</span><span style="color: #ed9d13">&#39;oldrandom&#39;</span><span style="color: #d0d0d0">]</span> <span style="color: #d0d0d0">=</span> <span style="color: #24909d">Math</span><span style="color: #d0d0d0">.random;</span>
+              <span style="color: #d0d0d0">should_fuzz</span> <span style="color: #d0d0d0">=</span> <span style="color: #6ab825; font-weight: bold">true</span><span style="color: #d0d0d0">;</span>
+        <span style="color: #d0d0d0">--&gt;</span>
+<span style="color: #6ab825; font-weight: bold">&lt;/script&gt;</span>
+<span style="color: #6ab825; font-weight: bold">&lt;script </span><span style="color: #bbbbbb">language=</span><span style="color: #ed9d13">&quot;JavaScript&quot;</span> <span style="color: #bbbbbb">src=</span><span style="color: #ed9d13">&quot;seedrandom-min.js&quot;</span><span style="color: #6ab825; font-weight: bold">&gt;&lt;/script&gt;</span>
+<span style="color: #999999; font-style: italic">&lt;!-- The Binfuzz.js script --&gt;</span>
+<span style="color: #6ab825; font-weight: bold">&lt;script </span><span style="color: #bbbbbb">language=</span><span style="color: #ed9d13">&quot;JavaScript&quot;</span> <span style="color: #bbbbbb">src=</span><span style="color: #ed9d13">&quot;binfuzz.js&quot;</span><span style="color: #6ab825; font-weight: bold">&gt;&lt;/script&gt;</span>
+<span style="color: #6ab825; font-weight: bold">&lt;script </span><span style="color: #bbbbbb">language=</span><span style="color: #ed9d13">&quot;JavaScript&quot;</span><span style="color: #6ab825; font-weight: bold">&gt;</span>
+    <span style="color: #999999; font-style: italic">&lt;!--</span>
+        <span style="color: #999999; font-style: italic">// If the browser doesn&#39;t support native base64</span>
+        <span style="color: #999999; font-style: italic">// then use base64.js version.</span>
+        <span style="color: #6ab825; font-weight: bold">if</span> <span style="color: #d0d0d0">(!</span><span style="color: #24909d">window</span><span style="color: #d0d0d0">.btoa)</span> <span style="color: #24909d">window</span><span style="color: #d0d0d0">.btoa</span> <span style="color: #d0d0d0">=</span> <span style="color: #d0d0d0">base64.encode;</span>
+        <span style="color: #6ab825; font-weight: bold">if</span> <span style="color: #d0d0d0">(!</span><span style="color: #24909d">window</span><span style="color: #d0d0d0">.atob)</span> <span style="color: #24909d">window</span><span style="color: #d0d0d0">.atob</span> <span style="color: #d0d0d0">=</span> <span style="color: #d0d0d0">base64.decode;</span>
+        
+        <span style="color: #999999; font-style: italic">// Create a new link element to dynamically update the</span>
+        <span style="color: #999999; font-style: italic">// favicon for this browser tab</span>
+        <span style="color: #6ab825; font-weight: bold">function</span> <span style="color: #d0d0d0">changeFavicon(src)</span> <span style="color: #d0d0d0">{</span>
+            <span style="color: #24909d">document</span><span style="color: #d0d0d0">.head</span> <span style="color: #d0d0d0">||</span> <span style="color: #d0d0d0">(</span><span style="color: #24909d">document</span><span style="color: #d0d0d0">.head</span> <span style="color: #d0d0d0">=</span> <span style="color: #24909d">document</span><span style="color: #d0d0d0">.getElementsByTagName(</span><span style="color: #ed9d13">&#39;head&#39;</span><span style="color: #d0d0d0">)[</span><span style="color: #3677a9">0</span><span style="color: #d0d0d0">]);</span>
+            <span style="color: #6ab825; font-weight: bold">var</span> <span style="color: #d0d0d0">link</span> <span style="color: #d0d0d0">=</span> <span style="color: #24909d">document</span><span style="color: #d0d0d0">.createElement(</span><span style="color: #ed9d13">&#39;link&#39;</span><span style="color: #d0d0d0">),</span>
+                <span style="color: #d0d0d0">oldLink</span> <span style="color: #d0d0d0">=</span> <span style="color: #24909d">document</span><span style="color: #d0d0d0">.getElementById(</span><span style="color: #ed9d13">&#39;dynamic-favicon&#39;</span><span style="color: #d0d0d0">);</span>
+            <span style="color: #d0d0d0">link.id</span> <span style="color: #d0d0d0">=</span> <span style="color: #ed9d13">&#39;dynamic-favicon&#39;</span><span style="color: #d0d0d0">;</span>
+            <span style="color: #d0d0d0">link.rel</span> <span style="color: #d0d0d0">=</span> <span style="color: #ed9d13">&#39;icon&#39;</span><span style="color: #d0d0d0">;</span>
+            <span style="color: #d0d0d0">link.href</span> <span style="color: #d0d0d0">=</span> <span style="color: #d0d0d0">src;</span>
+            <span style="color: #6ab825; font-weight: bold">if</span> <span style="color: #d0d0d0">(oldLink)</span> <span style="color: #d0d0d0">{</span>
+                <span style="color: #24909d">document</span><span style="color: #d0d0d0">.head.removeChild(oldLink);</span>
+            <span style="color: #d0d0d0">}</span>
+            <span style="color: #24909d">document</span><span style="color: #d0d0d0">.head.appendChild(link);</span>
+        <span style="color: #d0d0d0">}</span>
+        
+        <span style="color: #999999; font-style: italic">// Draw this icon file in a canvas element</span>
+        <span style="color: #6ab825; font-weight: bold">function</span> <span style="color: #d0d0d0">drawPreview(datalink)</span> <span style="color: #d0d0d0">{</span>
+            <span style="color: #6ab825; font-weight: bold">var</span> <span style="color: #d0d0d0">canvas</span> <span style="color: #d0d0d0">=</span> <span style="color: #24909d">document</span><span style="color: #d0d0d0">.getElementById(</span><span style="color: #ed9d13">&#39;iconpreview&#39;</span><span style="color: #d0d0d0">);</span>
+            <span style="color: #d0d0d0">context</span> <span style="color: #d0d0d0">=</span> <span style="color: #d0d0d0">canvas.getContext(</span><span style="color: #ed9d13">&#39;2d&#39;</span><span style="color: #d0d0d0">);</span>
+        
+            <span style="color: #6ab825; font-weight: bold">var</span> <span style="color: #d0d0d0">oldw</span> <span style="color: #d0d0d0">=</span> <span style="color: #d0d0d0">canvas.width;</span>
+            <span style="color: #999999; font-style: italic">// clear the old icon in the canvas by changing the width</span>
+            <span style="color: #999999; font-style: italic">// and re-setting it</span>
+            <span style="color: #d0d0d0">canvas.width</span> <span style="color: #d0d0d0">=</span> <span style="color: #3677a9">1</span><span style="color: #d0d0d0">;</span>
+            <span style="color: #d0d0d0">canvas.width</span> <span style="color: #d0d0d0">=</span> <span style="color: #d0d0d0">oldw;</span>
+        
+            <span style="color: #999999; font-style: italic">// create an Image from the base64 data:// URL</span>
+            <span style="color: #999999; font-style: italic">// that represents the icon</span>
+            <span style="color: #d0d0d0">icon_preview</span> <span style="color: #d0d0d0">=</span> <span style="color: #6ab825; font-weight: bold">new</span> <span style="color: #d0d0d0">Image();</span>
+            <span style="color: #d0d0d0">icon_preview.src</span> <span style="color: #d0d0d0">=</span> <span style="color: #d0d0d0">datalink;</span>
+            <span style="color: #d0d0d0">icon_preview.onload</span> <span style="color: #d0d0d0">=</span> <span style="color: #6ab825; font-weight: bold">function</span><span style="color: #d0d0d0">()</span> <span style="color: #d0d0d0">{</span>
+                <span style="color: #d0d0d0">console.log(</span><span style="color: #ed9d13">&quot;drawing image&quot;</span><span style="color: #d0d0d0">);</span>
+                <span style="color: #6ab825; font-weight: bold">try</span> <span style="color: #d0d0d0">{</span>
+                    <span style="color: #999999; font-style: italic">// The image has been parsed, draw it on the canvas</span>
+                    <span style="color: #d0d0d0">context.drawImage(icon_preview,</span> <span style="color: #3677a9">128</span><span style="color: #d0d0d0">/</span><span style="color: #3677a9">2</span><span style="color: #d0d0d0">-</span><span style="color: #3677a9">8</span><span style="color: #d0d0d0">,</span> <span style="color: #3677a9">128</span><span style="color: #d0d0d0">/</span><span style="color: #3677a9">2</span><span style="color: #d0d0d0">-</span><span style="color: #3677a9">8</span><span style="color: #d0d0d0">);</span>
+                    <span style="color: #6ab825; font-weight: bold">delete</span> <span style="color: #6ab825; font-weight: bold">this</span><span style="color: #d0d0d0">.src;</span>
+                <span style="color: #d0d0d0">}</span> <span style="color: #6ab825; font-weight: bold">catch</span> <span style="color: #d0d0d0">(err)</span> <span style="color: #d0d0d0">{</span>
+                    <span style="color: #999999; font-style: italic">// could not draw the image</span>
+                    <span style="color: #d0d0d0">console.log(</span><span style="color: #ed9d13">&quot;could not draw image&quot;</span><span style="color: #d0d0d0">);</span>
+                <span style="color: #d0d0d0">}</span>
+                <span style="color: #999999; font-style: italic">// do the next image</span>
+                <span style="color: #d0d0d0">setTimeout(</span><span style="color: #ed9d13">&#39;fuzzAnIcon()&#39;</span><span style="color: #d0d0d0">,</span> <span style="color: #3677a9">500</span><span style="color: #d0d0d0">);</span>    
+            <span style="color: #d0d0d0">};</span>
+            <span style="color: #d0d0d0">icon_preview.onerror</span> <span style="color: #d0d0d0">=</span> <span style="color: #6ab825; font-weight: bold">function</span><span style="color: #d0d0d0">()</span> <span style="color: #d0d0d0">{</span>
+                <span style="color: #999999; font-style: italic">// There was a failure parsing the image; try the next</span>
+                <span style="color: #d0d0d0">setTimeout(</span><span style="color: #ed9d13">&#39;fuzzAnIcon()&#39;</span><span style="color: #d0d0d0">,</span> <span style="color: #3677a9">500</span><span style="color: #d0d0d0">);</span>    
+            <span style="color: #d0d0d0">};</span>
+        <span style="color: #d0d0d0">}</span>
+        
+        <span style="color: #999999; font-style: italic">// a simple logger to write log data to a text box</span>
+        <span style="color: #6ab825; font-weight: bold">function</span> <span style="color: #d0d0d0">myLog(msg)</span>
+        <span style="color: #d0d0d0">{</span>
+            <span style="color: #6ab825; font-weight: bold">var</span> <span style="color: #d0d0d0">val</span> <span style="color: #d0d0d0">=</span> <span style="color: #24909d">document</span><span style="color: #d0d0d0">.getElementById(</span><span style="color: #ed9d13">&#39;textlog&#39;</span><span style="color: #d0d0d0">).value;</span>
+            <span style="color: #24909d">document</span><span style="color: #d0d0d0">.getElementById(</span><span style="color: #ed9d13">&#39;textlog&#39;</span><span style="color: #d0d0d0">).value</span> <span style="color: #d0d0d0">=</span>  <span style="color: #d0d0d0">msg</span> <span style="color: #d0d0d0">+</span> <span style="color: #ed9d13">&quot;\n&quot;</span> <span style="color: #d0d0d0">+</span> <span style="color: #d0d0d0">val;</span>
+        <span style="color: #d0d0d0">}</span>
+        
+        
+        <span style="color: #999999; font-style: italic">// defines the icon structure and then creates a new icon</span>
+        <span style="color: #999999; font-style: italic">// based on the structure definition.</span>
+        <span style="color: #6ab825; font-weight: bold">function</span> <span style="color: #d0d0d0">makeNewIcon()</span> <span style="color: #d0d0d0">{</span>
+            <span style="color: #999999; font-style: italic">// this is the overall container; it is needed</span>
+            <span style="color: #999999; font-style: italic">// since icons include two structures that reference </span>
+            <span style="color: #999999; font-style: italic">// each other</span>
+            <span style="color: #6ab825; font-weight: bold">var</span> <span style="color: #d0d0d0">ICON</span> <span style="color: #d0d0d0">=</span> <span style="color: #6ab825; font-weight: bold">new</span> <span style="color: #d0d0d0">Container({</span><span style="color: #ed9d13">&#39;name&#39;</span><span style="color: #d0d0d0">:</span> <span style="color: #ed9d13">&#39;ICON&#39;</span><span style="color: #d0d0d0">});</span>
+        
+            <span style="color: #999999; font-style: italic">// this is the actual bitmap information</span>
+            <span style="color: #999999; font-style: italic">// as defined in a windows bitmap. </span>
+            <span style="color: #999999; font-style: italic">// See:</span>
+            <span style="color: #999999; font-style: italic">// http://msdn.microsoft.com/en-us/library/windows/desktop/dd183376(v=vs.85).aspx</span>
+            <span style="color: #6ab825; font-weight: bold">var</span> <span style="color: #d0d0d0">tagBITMAPINFOHEADER</span> <span style="color: #d0d0d0">=</span> <span style="color: #6ab825; font-weight: bold">new</span> <span style="color: #d0d0d0">Container(</span>
+                <span style="color: #d0d0d0">{</span><span style="color: #ed9d13">&#39;root&#39;</span><span style="color: #d0d0d0">:</span> <span style="color: #d0d0d0">ICON,</span>
+                <span style="color: #ed9d13">&#39;name&#39;</span><span style="color: #d0d0d0">:</span> <span style="color: #ed9d13">&#39;tagBITMAPINFOHEADER&#39;</span><span style="color: #d0d0d0">}</span>
+                <span style="color: #d0d0d0">);</span>
+        
+            <span style="color: #999999; font-style: italic">// The IntSize element is used for sizes</span>
+            <span style="color: #999999; font-style: italic">// of other structures</span>
+        
+            <span style="color: #999999; font-style: italic">// this is the size of the tagBITMAPINFOHEADER structure</span>
+            <span style="color: #999999; font-style: italic">// the &#39;target&#39; is the struture itself, </span>
+            <span style="color: #999999; font-style: italic">// and its size will be automatically </span>
+            <span style="color: #999999; font-style: italic">// calculated. This element is not fuzzed</span>
+            <span style="color: #d0d0d0">tagBITMAPINFOHEADER.addChild(</span> <span style="color: #6ab825; font-weight: bold">new</span> <span style="color: #d0d0d0">IntSize(</span>
+                <span style="color: #d0d0d0">{</span><span style="color: #ed9d13">&#39;root&#39;</span><span style="color: #d0d0d0">:</span> <span style="color: #d0d0d0">ICON,</span>
+                <span style="color: #ed9d13">&#39;name&#39;</span><span style="color: #d0d0d0">:</span> <span style="color: #ed9d13">&#39;biSize&#39;</span><span style="color: #d0d0d0">,</span>
+                <span style="color: #ed9d13">&#39;bytesize&#39;</span><span style="color: #d0d0d0">:</span> <span style="color: #3677a9">4</span><span style="color: #d0d0d0">,</span> 
+                <span style="color: #ed9d13">&#39;nofuzz&#39;</span><span style="color: #d0d0d0">:</span> <span style="color: #6ab825; font-weight: bold">true</span><span style="color: #d0d0d0">,</span>
+                <span style="color: #ed9d13">&#39;signed&#39;</span><span style="color: #d0d0d0">:</span> <span style="color: #6ab825; font-weight: bold">true</span><span style="color: #d0d0d0">,</span>
+                <span style="color: #ed9d13">&#39;target&#39;</span><span style="color: #d0d0d0">:</span> <span style="color: #d0d0d0">tagBITMAPINFOHEADER}</span>
+                <span style="color: #d0d0d0">));</span>
+        
+            <span style="color: #999999; font-style: italic">// the width of the bitmap; takes on one of</span>
+            <span style="color: #999999; font-style: italic">// the values in &#39;values&#39;</span>
+            <span style="color: #d0d0d0">tagBITMAPINFOHEADER.addChild(</span> <span style="color: #6ab825; font-weight: bold">new</span> <span style="color: #d0d0d0">Int32(</span>
+                <span style="color: #d0d0d0">{</span><span style="color: #ed9d13">&#39;root&#39;</span><span style="color: #d0d0d0">:</span> <span style="color: #d0d0d0">ICON,</span>
+                <span style="color: #ed9d13">&#39;name&#39;</span><span style="color: #d0d0d0">:</span> <span style="color: #ed9d13">&#39;biWidth&#39;</span><span style="color: #d0d0d0">,</span> 
+                <span style="color: #ed9d13">&#39;values&#39;</span><span style="color: #d0d0d0">:</span> <span style="color: #d0d0d0">[</span><span style="color: #3677a9">0</span><span style="color: #d0d0d0">,</span> <span style="color: #3677a9">1</span><span style="color: #d0d0d0">,</span> <span style="color: #3677a9">3</span><span style="color: #d0d0d0">,</span> <span style="color: #3677a9">16</span><span style="color: #d0d0d0">,</span> <span style="color: #3677a9">32</span><span style="color: #d0d0d0">,</span> <span style="color: #3677a9">64</span><span style="color: #d0d0d0">,</span> <span style="color: #3677a9">129</span><span style="color: #d0d0d0">,</span> <span style="color: #3677a9">0xFF</span><span style="color: #d0d0d0">,</span> <span style="color: #3677a9">0xFFF</span><span style="color: #d0d0d0">,</span> <span style="color: #3677a9">0xFFFE</span><span style="color: #d0d0d0">,</span> <span style="color: #3677a9">0xFFFF</span><span style="color: #d0d0d0">]}</span>
+                <span style="color: #d0d0d0">));</span>
+        
+            <span style="color: #999999; font-style: italic">// the height of the bitmap; takes on one of</span>
+            <span style="color: #999999; font-style: italic">// the values in &#39;values&#39;</span>
+            <span style="color: #d0d0d0">tagBITMAPINFOHEADER.addChild(</span> <span style="color: #6ab825; font-weight: bold">new</span> <span style="color: #d0d0d0">Int32(</span>
+                <span style="color: #d0d0d0">{</span><span style="color: #ed9d13">&#39;root&#39;</span><span style="color: #d0d0d0">:</span> <span style="color: #d0d0d0">ICON,</span>
+                 <span style="color: #ed9d13">&#39;name&#39;</span><span style="color: #d0d0d0">:</span> <span style="color: #ed9d13">&#39;biHeight&#39;</span><span style="color: #d0d0d0">,</span>
+                <span style="color: #ed9d13">&#39;values&#39;</span><span style="color: #d0d0d0">:</span> <span style="color: #d0d0d0">[</span><span style="color: #3677a9">0</span><span style="color: #d0d0d0">,</span> <span style="color: #3677a9">1</span><span style="color: #d0d0d0">,</span> <span style="color: #3677a9">3</span><span style="color: #d0d0d0">,</span> <span style="color: #3677a9">16</span><span style="color: #d0d0d0">,</span> <span style="color: #3677a9">32</span><span style="color: #d0d0d0">,</span> <span style="color: #3677a9">64</span><span style="color: #d0d0d0">,</span> <span style="color: #3677a9">129</span><span style="color: #d0d0d0">,</span> <span style="color: #3677a9">0x101</span><span style="color: #d0d0d0">,</span> <span style="color: #3677a9">0x1001</span><span style="color: #d0d0d0">,</span> <span style="color: #3677a9">0xFFFE</span><span style="color: #d0d0d0">,</span> <span style="color: #3677a9">0xFFFF</span><span style="color: #d0d0d0">]}</span>
+             <span style="color: #d0d0d0">));</span>
+        
+            <span style="color: #999999; font-style: italic">// the number of planes. This defaults to 1, but</span>
+            <span style="color: #999999; font-style: italic">// other values will be selected as fuzzing proceeds</span>
+            <span style="color: #d0d0d0">tagBITMAPINFOHEADER.addChild(</span> <span style="color: #6ab825; font-weight: bold">new</span> <span style="color: #d0d0d0">UInt16(</span>
+                <span style="color: #d0d0d0">{</span><span style="color: #ed9d13">&#39;root&#39;</span><span style="color: #d0d0d0">:</span> <span style="color: #d0d0d0">ICON,</span>
+                <span style="color: #ed9d13">&#39;name&#39;</span><span style="color: #d0d0d0">:</span> <span style="color: #ed9d13">&#39;biPlanes&#39;</span><span style="color: #d0d0d0">,</span>
+                <span style="color: #ed9d13">&#39;default&#39;</span><span style="color: #d0d0d0">:</span> <span style="color: #3677a9">1</span><span style="color: #d0d0d0">}</span>
+            <span style="color: #d0d0d0">));</span>
+        
+            <span style="color: #999999; font-style: italic">// the choices for the color depth</span>
+            <span style="color: #d0d0d0">tagBITMAPINFOHEADER.addChild(</span> <span style="color: #6ab825; font-weight: bold">new</span> <span style="color: #d0d0d0">UInt16(</span>
+                <span style="color: #d0d0d0">{</span><span style="color: #ed9d13">&#39;root&#39;</span><span style="color: #d0d0d0">:</span> <span style="color: #d0d0d0">ICON,</span>
+                 <span style="color: #ed9d13">&#39;name&#39;</span><span style="color: #d0d0d0">:</span> <span style="color: #ed9d13">&#39;biBitCount&#39;</span><span style="color: #d0d0d0">,</span>
+                 <span style="color: #ed9d13">&#39;values&#39;</span><span style="color: #d0d0d0">:</span> <span style="color: #d0d0d0">[</span><span style="color: #3677a9">1</span><span style="color: #d0d0d0">,</span><span style="color: #3677a9">2</span><span style="color: #d0d0d0">,</span><span style="color: #3677a9">4</span><span style="color: #d0d0d0">,</span><span style="color: #3677a9">8</span><span style="color: #d0d0d0">,</span><span style="color: #3677a9">16</span><span style="color: #d0d0d0">,</span><span style="color: #3677a9">24</span><span style="color: #d0d0d0">,</span><span style="color: #3677a9">32</span><span style="color: #d0d0d0">]}</span>
+            <span style="color: #d0d0d0">));</span>
+        
+            <span style="color: #999999; font-style: italic">// Documented compression values</span>
+            <span style="color: #d0d0d0">tagBITMAPINFOHEADER.addChild(</span> <span style="color: #6ab825; font-weight: bold">new</span> <span style="color: #d0d0d0">UInt32(</span>
+                <span style="color: #d0d0d0">{</span><span style="color: #ed9d13">&#39;root&#39;</span><span style="color: #d0d0d0">:</span> <span style="color: #d0d0d0">ICON,</span>
+                 <span style="color: #ed9d13">&#39;name&#39;</span><span style="color: #d0d0d0">:</span> <span style="color: #ed9d13">&#39;biCompression&#39;</span><span style="color: #d0d0d0">,</span>
+                 <span style="color: #ed9d13">&#39;values&#39;</span><span style="color: #d0d0d0">:</span> <span style="color: #d0d0d0">[</span><span style="color: #3677a9">0</span><span style="color: #d0d0d0">,</span><span style="color: #3677a9">1</span><span style="color: #d0d0d0">,</span><span style="color: #3677a9">2</span><span style="color: #d0d0d0">,</span><span style="color: #3677a9">3</span><span style="color: #d0d0d0">,</span><span style="color: #3677a9">6</span><span style="color: #d0d0d0">]}</span>
+            <span style="color: #d0d0d0">));</span>
+        
+            <span style="color: #999999; font-style: italic">// This is the size of the image.</span>
+            <span style="color: #999999; font-style: italic">// As we are generating images, we don&#39;t have image data a-priori</span>
+            <span style="color: #999999; font-style: italic">// We need to know how much data to generate.</span>
+            <span style="color: #999999; font-style: italic">// </span>
+            <span style="color: #999999; font-style: italic">// The size is calculated based on the width, height, planes, and bpp</span>
+            <span style="color: #999999; font-style: italic">// There are alignment issues that make this a bit complicated</span>
+            <span style="color: #d0d0d0">tagBITMAPINFOHEADER.addChild(</span> <span style="color: #6ab825; font-weight: bold">new</span> <span style="color: #d0d0d0">IntSize(</span>
+                <span style="color: #d0d0d0">{</span><span style="color: #ed9d13">&#39;root&#39;</span><span style="color: #d0d0d0">:</span> <span style="color: #d0d0d0">ICON,</span>
+                <span style="color: #ed9d13">&#39;name&#39;</span><span style="color: #d0d0d0">:</span> <span style="color: #ed9d13">&#39;biSizeImage&#39;</span><span style="color: #d0d0d0">,</span>
+                <span style="color: #ed9d13">&#39;bytesize&#39;</span><span style="color: #d0d0d0">:</span> <span style="color: #3677a9">4</span><span style="color: #d0d0d0">,</span>
+                <span style="color: #ed9d13">&#39;nofuzz&#39;</span><span style="color: #d0d0d0">:</span> <span style="color: #6ab825; font-weight: bold">true</span><span style="color: #d0d0d0">,</span>
+                <span style="color: #ed9d13">&#39;signed&#39;</span><span style="color: #d0d0d0">:</span> <span style="color: #6ab825; font-weight: bold">true</span><span style="color: #d0d0d0">,</span>
+                <span style="color: #ed9d13">&#39;target&#39;</span><span style="color: #d0d0d0">:</span> <span style="color: #d0d0d0">tagBITMAPINFOHEADER,</span>
+                <span style="color: #ed9d13">&#39;calcfunc&#39;</span><span style="color: #d0d0d0">:</span> <span style="color: #6ab825; font-weight: bold">function</span><span style="color: #d0d0d0">(target,</span> <span style="color: #d0d0d0">combo)</span> <span style="color: #d0d0d0">{</span>
+                    <span style="color: #6ab825; font-weight: bold">var</span> <span style="color: #d0d0d0">width</span> <span style="color: #d0d0d0">=</span> <span style="color: #d0d0d0">target.getChild(</span><span style="color: #ed9d13">&#39;biWidth&#39;</span><span style="color: #d0d0d0">).NativeValue();</span>    
+                    <span style="color: #6ab825; font-weight: bold">var</span> <span style="color: #d0d0d0">height</span> <span style="color: #d0d0d0">=</span> <span style="color: #d0d0d0">target.getChild(</span><span style="color: #ed9d13">&#39;biHeight&#39;</span><span style="color: #d0d0d0">).NativeValue();</span>
+                    <span style="color: #6ab825; font-weight: bold">var</span> <span style="color: #d0d0d0">planes</span> <span style="color: #d0d0d0">=</span> <span style="color: #d0d0d0">target.getChild(</span><span style="color: #ed9d13">&#39;biPlanes&#39;</span><span style="color: #d0d0d0">).NativeValue();</span>
+                    <span style="color: #6ab825; font-weight: bold">var</span> <span style="color: #d0d0d0">bpp</span> <span style="color: #d0d0d0">=</span> <span style="color: #d0d0d0">target.getChild(</span><span style="color: #ed9d13">&#39;biBitCount&#39;</span><span style="color: #d0d0d0">).NativeValue();</span>
+        
+                    <span style="color: #999999; font-style: italic">// size of OR mask</span>
+                    <span style="color: #6ab825; font-weight: bold">var</span> <span style="color: #d0d0d0">tmp1</span> <span style="color: #d0d0d0">=</span> <span style="color: #d0d0d0">width</span> <span style="color: #d0d0d0">*</span> <span style="color: #d0d0d0">planes</span> <span style="color: #d0d0d0">*</span> <span style="color: #d0d0d0">bpp</span> <span style="color: #d0d0d0">+</span> <span style="color: #3677a9">31</span><span style="color: #d0d0d0">;</span>
+                    <span style="color: #6ab825; font-weight: bold">var</span> <span style="color: #d0d0d0">tmp2</span> <span style="color: #d0d0d0">=</span> <span style="color: #d0d0d0">(tmp1</span> <span style="color: #d0d0d0">&amp;</span> <span style="color: #d0d0d0">~</span><span style="color: #3677a9">31</span><span style="color: #d0d0d0">)</span> <span style="color: #d0d0d0">/</span> <span style="color: #3677a9">8</span><span style="color: #d0d0d0">;</span>
+                    <span style="color: #6ab825; font-weight: bold">var</span> <span style="color: #d0d0d0">tmp3</span> <span style="color: #d0d0d0">=</span> <span style="color: #d0d0d0">tmp2</span> <span style="color: #d0d0d0">*</span> <span style="color: #d0d0d0">height</span> <span style="color: #d0d0d0">/</span> <span style="color: #3677a9">2</span><span style="color: #d0d0d0">;</span>
+        
+                    <span style="color: #999999; font-style: italic">// size of AND mask</span>
+                    <span style="color: #6ab825; font-weight: bold">var</span> <span style="color: #d0d0d0">and1</span> <span style="color: #d0d0d0">=</span> <span style="color: #d0d0d0">width</span> <span style="color: #d0d0d0">*</span> <span style="color: #d0d0d0">planes</span> <span style="color: #d0d0d0">*</span> <span style="color: #3677a9">1</span> <span style="color: #d0d0d0">+</span> <span style="color: #3677a9">31</span><span style="color: #d0d0d0">;</span>
+                    <span style="color: #6ab825; font-weight: bold">var</span> <span style="color: #d0d0d0">and2</span> <span style="color: #d0d0d0">=</span> <span style="color: #d0d0d0">(and1</span> <span style="color: #d0d0d0">&amp;</span> <span style="color: #d0d0d0">~</span><span style="color: #3677a9">31</span><span style="color: #d0d0d0">)</span> <span style="color: #d0d0d0">/</span> <span style="color: #3677a9">8</span><span style="color: #d0d0d0">;</span>
+                    <span style="color: #6ab825; font-weight: bold">var</span> <span style="color: #d0d0d0">and3</span> <span style="color: #d0d0d0">=</span> <span style="color: #d0d0d0">and2</span> <span style="color: #d0d0d0">*</span> <span style="color: #d0d0d0">height</span> <span style="color: #d0d0d0">/</span> <span style="color: #3677a9">2</span><span style="color: #d0d0d0">;</span>
+        
+                    <span style="color: #d0d0d0">tmp3</span> <span style="color: #d0d0d0">+=</span> <span style="color: #d0d0d0">and3;</span>
+        
+                    <span style="color: #6ab825; font-weight: bold">return</span> <span style="color: #d0d0d0">tmp3;</span>
+                    <span style="color: #d0d0d0">}</span>
+                <span style="color: #d0d0d0">}</span>
+            <span style="color: #d0d0d0">));</span>
+        
+            <span style="color: #999999; font-style: italic">// these are values that are ignored</span>
+            <span style="color: #999999; font-style: italic">// according to the documentation, and</span>
+            <span style="color: #999999; font-style: italic">// are therefore set to a constant value</span>
+            <span style="color: #d0d0d0">tagBITMAPINFOHEADER.addChild(</span> <span style="color: #6ab825; font-weight: bold">new</span> <span style="color: #d0d0d0">Int32(</span>
+                <span style="color: #d0d0d0">{</span><span style="color: #ed9d13">&#39;root&#39;</span><span style="color: #d0d0d0">:</span> <span style="color: #d0d0d0">ICON,</span>
+                <span style="color: #ed9d13">&#39;name&#39;</span><span style="color: #d0d0d0">:</span> <span style="color: #ed9d13">&#39;biXPelsPerMeter&#39;</span><span style="color: #d0d0d0">,</span>
+                <span style="color: #ed9d13">&#39;constant&#39;</span><span style="color: #d0d0d0">:</span> <span style="color: #3677a9">0</span><span style="color: #d0d0d0">}</span>
+            <span style="color: #d0d0d0">));</span>
+            <span style="color: #d0d0d0">tagBITMAPINFOHEADER.addChild(</span> <span style="color: #6ab825; font-weight: bold">new</span> <span style="color: #d0d0d0">Int32(</span>
+                <span style="color: #d0d0d0">{</span><span style="color: #ed9d13">&#39;root&#39;</span><span style="color: #d0d0d0">:</span> <span style="color: #d0d0d0">ICON,</span>
+                <span style="color: #ed9d13">&#39;name&#39;</span><span style="color: #d0d0d0">:</span> <span style="color: #ed9d13">&#39;biYPelsPerMeter&#39;</span><span style="color: #d0d0d0">,</span>
+                <span style="color: #ed9d13">&#39;constant&#39;</span><span style="color: #d0d0d0">:</span> <span style="color: #3677a9">0</span><span style="color: #d0d0d0">}</span>
+            <span style="color: #d0d0d0">));</span>
+            <span style="color: #d0d0d0">tagBITMAPINFOHEADER.addChild(</span> <span style="color: #6ab825; font-weight: bold">new</span> <span style="color: #d0d0d0">UInt32(</span>
+                <span style="color: #d0d0d0">{</span><span style="color: #ed9d13">&#39;root&#39;</span><span style="color: #d0d0d0">:</span> <span style="color: #d0d0d0">ICON,</span>
+                <span style="color: #ed9d13">&#39;name&#39;</span><span style="color: #d0d0d0">:</span> <span style="color: #ed9d13">&#39;biClrUsed&#39;</span><span style="color: #d0d0d0">,</span>
+                <span style="color: #ed9d13">&#39;constant&#39;</span><span style="color: #d0d0d0">:</span> <span style="color: #3677a9">0</span><span style="color: #d0d0d0">}</span>
+            <span style="color: #d0d0d0">));</span>
+            <span style="color: #d0d0d0">tagBITMAPINFOHEADER.addChild(</span> <span style="color: #6ab825; font-weight: bold">new</span> <span style="color: #d0d0d0">UInt32(</span>
+                <span style="color: #d0d0d0">{</span><span style="color: #ed9d13">&#39;root&#39;</span><span style="color: #d0d0d0">:</span> <span style="color: #d0d0d0">ICON,</span>
+                <span style="color: #ed9d13">&#39;name&#39;</span><span style="color: #d0d0d0">:</span> <span style="color: #ed9d13">&#39;biClrImportant&#39;</span><span style="color: #d0d0d0">,</span>
+                <span style="color: #ed9d13">&#39;constant&#39;</span><span style="color: #d0d0d0">:</span> <span style="color: #3677a9">0</span><span style="color: #d0d0d0">}</span>
+            <span style="color: #d0d0d0">));</span>
+        
+            <span style="color: #999999; font-style: italic">// an icon is composed of many images</span>
+            <span style="color: #999999; font-style: italic">// While they can technically be all different</span>
+            <span style="color: #999999; font-style: italic">// we compromise expression for ease of </span>
+            <span style="color: #999999; font-style: italic">// implementation here.</span>
+            <span style="color: #999999; font-style: italic">// </span>
+            <span style="color: #999999; font-style: italic">// We use an array of the same icon, but</span>
+            <span style="color: #999999; font-style: italic">// the size of the array can vary</span>
+            <span style="color: #999999; font-style: italic">// </span>
+            <span style="color: #6ab825; font-weight: bold">var</span> <span style="color: #d0d0d0">ICONIMAGE</span> <span style="color: #d0d0d0">=</span> <span style="color: #6ab825; font-weight: bold">new</span> <span style="color: #d0d0d0">ArrayContainer(</span>
+                <span style="color: #d0d0d0">{</span><span style="color: #ed9d13">&#39;root&#39;</span><span style="color: #d0d0d0">:</span> <span style="color: #d0d0d0">ICON,</span>
+                 <span style="color: #ed9d13">&#39;name&#39;</span><span style="color: #d0d0d0">:</span> <span style="color: #ed9d13">&#39;ICONIMAGE&#39;</span><span style="color: #d0d0d0">,</span>
+                 <span style="color: #ed9d13">&#39;count&#39;</span><span style="color: #d0d0d0">:</span> <span style="color: #ed9d13">&#39;ICON.ICONDIR.idCount&#39;</span><span style="color: #d0d0d0">}</span>
+            <span style="color: #d0d0d0">);</span>
+        
+            <span style="color: #999999; font-style: italic">// this array will have a bitmapinfoheader</span>
+            <span style="color: #d0d0d0">ICONIMAGE.addChild(tagBITMAPINFOHEADER);</span>
+        
+            <span style="color: #999999; font-style: italic">// this is an optional field that I currently</span>
+            <span style="color: #999999; font-style: italic">// do not implement. This field is used in</span>
+            <span style="color: #999999; font-style: italic">// some color depth icons though.</span>
+            <span style="color: #d0d0d0">ICONIMAGE.addChild(</span><span style="color: #6ab825; font-weight: bold">new</span> <span style="color: #d0d0d0">Blob(</span>
+                <span style="color: #d0d0d0">{</span><span style="color: #ed9d13">&#39;root&#39;</span><span style="color: #d0d0d0">:</span> <span style="color: #d0d0d0">ICON,</span>
+                 <span style="color: #ed9d13">&#39;name&#39;</span><span style="color: #d0d0d0">:</span> <span style="color: #ed9d13">&#39;icColors&#39;</span><span style="color: #d0d0d0">,</span>
+                 <span style="color: #ed9d13">&#39;length&#39;</span><span style="color: #d0d0d0">:</span> <span style="color: #3677a9">0</span><span style="color: #d0d0d0">,</span>
+                 <span style="color: #ed9d13">&#39;blob&#39;</span><span style="color: #d0d0d0">:</span> <span style="color: #ed9d13">&quot;&quot;</span><span style="color: #d0d0d0">}</span>
+            <span style="color: #d0d0d0">));</span>
+        
+            <span style="color: #999999; font-style: italic">// this is the icon XOR mask.</span>
+            <span style="color: #999999; font-style: italic">// Like the actual image data, we do not know it a priori</span>
+            <span style="color: #999999; font-style: italic">// since we generate new icons. Also like the image data,</span>
+            <span style="color: #999999; font-style: italic">// the size of the XOR mask is based on the width, height</span>
+            <span style="color: #999999; font-style: italic">// planes, and color depth</span>
+            <span style="color: #999999; font-style: italic">//</span>
+            <span style="color: #999999; font-style: italic">// There is a sanity check to avoid generating gigabytes of</span>
+            <span style="color: #999999; font-style: italic">// icon data. This script uses too much memory as is.</span>
+            <span style="color: #d0d0d0">ICONIMAGE.addChild(</span><span style="color: #6ab825; font-weight: bold">new</span> <span style="color: #d0d0d0">Blob(</span>
+                <span style="color: #d0d0d0">{</span><span style="color: #ed9d13">&#39;root&#39;</span><span style="color: #d0d0d0">:</span> <span style="color: #d0d0d0">ICON,</span>
+                 <span style="color: #ed9d13">&#39;name&#39;</span><span style="color: #d0d0d0">:</span> <span style="color: #ed9d13">&#39;icXOR&#39;</span><span style="color: #d0d0d0">,</span>
+                 <span style="color: #ed9d13">&#39;generator&#39;</span><span style="color: #d0d0d0">:</span> <span style="color: #d0d0d0">makeRandomString,</span>
+                 <span style="color: #ed9d13">&#39;length&#39;</span><span style="color: #d0d0d0">:</span> <span style="color: #6ab825; font-weight: bold">function</span> <span style="color: #d0d0d0">(seed,</span> <span style="color: #d0d0d0">parent,</span> <span style="color: #d0d0d0">root)</span> <span style="color: #d0d0d0">{</span>
+                        <span style="color: #6ab825; font-weight: bold">var</span> <span style="color: #d0d0d0">width</span> <span style="color: #d0d0d0">=</span> <span style="color: #d0d0d0">parent.getChild(</span><span style="color: #ed9d13">&#39;tagBITMAPINFOHEADER&#39;</span><span style="color: #d0d0d0">).getChild(</span><span style="color: #ed9d13">&#39;biWidth&#39;</span><span style="color: #d0d0d0">).NativeValue();</span>
+                        <span style="color: #6ab825; font-weight: bold">var</span> <span style="color: #d0d0d0">height</span> <span style="color: #d0d0d0">=</span> <span style="color: #d0d0d0">parent.getChild(</span><span style="color: #ed9d13">&#39;tagBITMAPINFOHEADER&#39;</span><span style="color: #d0d0d0">).getChild(</span><span style="color: #ed9d13">&#39;biHeight&#39;</span><span style="color: #d0d0d0">).NativeValue()</span> <span style="color: #d0d0d0">/</span> <span style="color: #3677a9">2</span><span style="color: #d0d0d0">;</span>
+                        <span style="color: #6ab825; font-weight: bold">var</span> <span style="color: #d0d0d0">bpp</span> <span style="color: #d0d0d0">=</span> <span style="color: #d0d0d0">parent.getChild(</span><span style="color: #ed9d13">&#39;tagBITMAPINFOHEADER&#39;</span><span style="color: #d0d0d0">).getChild(</span><span style="color: #ed9d13">&#39;biBitCount&#39;</span><span style="color: #d0d0d0">).NativeValue();</span>
+                        <span style="color: #6ab825; font-weight: bold">var</span> <span style="color: #d0d0d0">planes</span> <span style="color: #d0d0d0">=</span> <span style="color: #d0d0d0">parent.getChild(</span><span style="color: #ed9d13">&#39;tagBITMAPINFOHEADER&#39;</span><span style="color: #d0d0d0">).getChild(</span><span style="color: #ed9d13">&#39;biPlanes&#39;</span><span style="color: #d0d0d0">).NativeValue();</span>
+        
+                        <span style="color: #6ab825; font-weight: bold">var</span> <span style="color: #d0d0d0">stride</span> <span style="color: #d0d0d0">=</span> <span style="color: #d0d0d0">((</span> <span style="color: #d0d0d0">width</span> <span style="color: #d0d0d0">*</span> <span style="color: #d0d0d0">planes</span> <span style="color: #d0d0d0">*</span> <span style="color: #d0d0d0">bpp</span> <span style="color: #d0d0d0">+</span> <span style="color: #3677a9">31</span><span style="color: #d0d0d0">)</span> <span style="color: #d0d0d0">&amp;</span> <span style="color: #d0d0d0">~</span><span style="color: #3677a9">31</span><span style="color: #d0d0d0">)</span> <span style="color: #d0d0d0">/</span> <span style="color: #3677a9">8</span><span style="color: #d0d0d0">;</span>
+                        <span style="color: #6ab825; font-weight: bold">var</span> <span style="color: #d0d0d0">thislen</span> <span style="color: #d0d0d0">=</span> <span style="color: #d0d0d0">stride</span> <span style="color: #d0d0d0">*</span> <span style="color: #d0d0d0">height;</span>
+                        
+                        <span style="color: #6ab825; font-weight: bold">var</span> <span style="color: #d0d0d0">blobsize</span> <span style="color: #d0d0d0">=</span> <span style="color: #d0d0d0">thislen;</span>
+                        <span style="color: #999999; font-style: italic">// sanity check. we are not about to generate gigabytes of</span>
+                        <span style="color: #999999; font-style: italic">// icon data</span>
+                        <span style="color: #6ab825; font-weight: bold">if</span><span style="color: #d0d0d0">(blobsize</span> <span style="color: #d0d0d0">&lt;</span> <span style="color: #3677a9">0</span> <span style="color: #d0d0d0">||</span> <span style="color: #d0d0d0">blobsize</span> <span style="color: #d0d0d0">&gt;</span> <span style="color: #3677a9">0xFFFFF</span><span style="color: #d0d0d0">)</span> <span style="color: #d0d0d0">{</span>
+                                <span style="color: #d0d0d0">blobsize</span> <span style="color: #d0d0d0">=</span> <span style="color: #3677a9">0xFFFFF</span><span style="color: #d0d0d0">;</span>
+                        <span style="color: #d0d0d0">}</span>
+                        <span style="color: #6ab825; font-weight: bold">return</span> <span style="color: #d0d0d0">blobsize;</span>
+                        <span style="color: #d0d0d0">}</span>
+                <span style="color: #d0d0d0">}</span>
+            <span style="color: #d0d0d0">));</span>
+        
+            <span style="color: #999999; font-style: italic">// this is just like the XOR mask, but the size is different</span>
+            <span style="color: #999999; font-style: italic">// since there the AND mask does not depend on color depth</span>
+            <span style="color: #d0d0d0">ICONIMAGE.addChild(</span><span style="color: #6ab825; font-weight: bold">new</span> <span style="color: #d0d0d0">Blob(</span>
+                <span style="color: #d0d0d0">{</span><span style="color: #ed9d13">&#39;root&#39;</span><span style="color: #d0d0d0">:</span> <span style="color: #d0d0d0">ICON,</span>
+                <span style="color: #ed9d13">&#39;name&#39;</span><span style="color: #d0d0d0">:</span> <span style="color: #ed9d13">&#39;icAND&#39;</span><span style="color: #d0d0d0">,</span>
+                 <span style="color: #ed9d13">&#39;generator&#39;</span><span style="color: #d0d0d0">:</span> <span style="color: #d0d0d0">makeRandomString,</span>
+                 <span style="color: #ed9d13">&#39;length&#39;</span><span style="color: #d0d0d0">:</span> <span style="color: #6ab825; font-weight: bold">function</span> <span style="color: #d0d0d0">(seed,</span> <span style="color: #d0d0d0">parent,</span> <span style="color: #d0d0d0">root)</span>
+                 <span style="color: #d0d0d0">{</span>
+                    <span style="color: #6ab825; font-weight: bold">var</span> <span style="color: #d0d0d0">width</span> <span style="color: #d0d0d0">=</span> <span style="color: #d0d0d0">parent.getChild(</span><span style="color: #ed9d13">&#39;tagBITMAPINFOHEADER&#39;</span><span style="color: #d0d0d0">).getChild(</span><span style="color: #ed9d13">&#39;biWidth&#39;</span><span style="color: #d0d0d0">).NativeValue();</span>
+                    <span style="color: #6ab825; font-weight: bold">var</span> <span style="color: #d0d0d0">height</span> <span style="color: #d0d0d0">=</span> <span style="color: #d0d0d0">parent.getChild(</span><span style="color: #ed9d13">&#39;tagBITMAPINFOHEADER&#39;</span><span style="color: #d0d0d0">).getChild(</span><span style="color: #ed9d13">&#39;biHeight&#39;</span><span style="color: #d0d0d0">).NativeValue()</span> <span style="color: #d0d0d0">/</span> <span style="color: #3677a9">2</span><span style="color: #d0d0d0">;</span>
+                    <span style="color: #6ab825; font-weight: bold">var</span> <span style="color: #d0d0d0">planes</span> <span style="color: #d0d0d0">=</span> <span style="color: #d0d0d0">parent.getChild(</span><span style="color: #ed9d13">&#39;tagBITMAPINFOHEADER&#39;</span><span style="color: #d0d0d0">).getChild(</span><span style="color: #ed9d13">&#39;biPlanes&#39;</span><span style="color: #d0d0d0">).NativeValue();</span>
+        
+        
+                    <span style="color: #6ab825; font-weight: bold">var</span> <span style="color: #d0d0d0">stride</span> <span style="color: #d0d0d0">=</span> <span style="color: #d0d0d0">((</span> <span style="color: #d0d0d0">width</span> <span style="color: #d0d0d0">*</span> <span style="color: #d0d0d0">planes</span> <span style="color: #d0d0d0">*</span> <span style="color: #3677a9">1</span> <span style="color: #d0d0d0">+</span> <span style="color: #3677a9">31</span><span style="color: #d0d0d0">)</span> <span style="color: #d0d0d0">&amp;</span> <span style="color: #d0d0d0">~</span><span style="color: #3677a9">31</span><span style="color: #d0d0d0">)</span> <span style="color: #d0d0d0">/</span> <span style="color: #3677a9">8</span><span style="color: #d0d0d0">;</span>
+                    <span style="color: #6ab825; font-weight: bold">var</span> <span style="color: #d0d0d0">thislen</span> <span style="color: #d0d0d0">=</span> <span style="color: #d0d0d0">stride</span> <span style="color: #d0d0d0">*</span> <span style="color: #d0d0d0">height;</span>
+        
+                    <span style="color: #999999; font-style: italic">// sanity check. we are not about to generate gigabytes of</span>
+                    <span style="color: #999999; font-style: italic">// icon data, even if I really want to</span>
+                    <span style="color: #6ab825; font-weight: bold">if</span><span style="color: #d0d0d0">(thislen</span> <span style="color: #d0d0d0">&lt;</span> <span style="color: #3677a9">0</span> <span style="color: #d0d0d0">||</span> <span style="color: #d0d0d0">thislen</span> <span style="color: #d0d0d0">&gt;</span> <span style="color: #3677a9">0xFFFFF</span><span style="color: #d0d0d0">)</span> <span style="color: #d0d0d0">{</span>
+                            <span style="color: #d0d0d0">thislen</span> <span style="color: #d0d0d0">=</span> <span style="color: #3677a9">0xFFFFF</span><span style="color: #d0d0d0">;</span>
+                    <span style="color: #d0d0d0">}</span>
+                    <span style="color: #6ab825; font-weight: bold">return</span> <span style="color: #d0d0d0">thislen;</span>
+                 <span style="color: #d0d0d0">}</span> 
+                 <span style="color: #d0d0d0">}</span>
+            <span style="color: #d0d0d0">));</span>
+        
+        
+            <span style="color: #999999; font-style: italic">// The array of icon metadata is stored separately</span>
+            <span style="color: #999999; font-style: italic">// from the bitmap data, but they need to have </span>
+            <span style="color: #999999; font-style: italic">// some kind of link with each other.</span>
+            <span style="color: #999999; font-style: italic">// </span>
+            <span style="color: #999999; font-style: italic">// That is one of the reasons each entry</span>
+            <span style="color: #999999; font-style: italic">// is named. Entries can be referenced by</span>
+            <span style="color: #999999; font-style: italic">// name, including arrays. </span>
+            <span style="color: #999999; font-style: italic">// </span>
+            <span style="color: #999999; font-style: italic">// The &#39;indexer&#39; value of the array is a token</span>
+            <span style="color: #999999; font-style: italic">// that will be replaced by the array index when</span>
+            <span style="color: #999999; font-style: italic">// it is used in children. </span>
+            <span style="color: #999999; font-style: italic">// </span>
+            <span style="color: #6ab825; font-weight: bold">var</span> <span style="color: #d0d0d0">ICONDIRENTRY</span> <span style="color: #d0d0d0">=</span> <span style="color: #6ab825; font-weight: bold">new</span> <span style="color: #d0d0d0">ArrayContainer(</span>
+                <span style="color: #d0d0d0">{</span><span style="color: #ed9d13">&#39;root&#39;</span><span style="color: #d0d0d0">:</span> <span style="color: #d0d0d0">ICON,</span>
+                 <span style="color: #ed9d13">&#39;name&#39;</span><span style="color: #d0d0d0">:</span> <span style="color: #ed9d13">&#39;idEntries&#39;</span><span style="color: #d0d0d0">,</span>
+                 <span style="color: #ed9d13">&#39;count&#39;</span><span style="color: #d0d0d0">:</span> <span style="color: #ed9d13">&#39;ICON.ICONDIR.idCount&#39;</span><span style="color: #d0d0d0">,</span>
+                 <span style="color: #ed9d13">&#39;indexer&#39;</span><span style="color: #d0d0d0">:</span> <span style="color: #ed9d13">&#39;%n&#39;</span><span style="color: #d0d0d0">}</span>
+            <span style="color: #d0d0d0">);</span>
+        
+            <span style="color: #999999; font-style: italic">// the width as defined by icon metadata</span>
+            <span style="color: #999999; font-style: italic">// Yes, a width is specified both in the bitmapinfo</span>
+            <span style="color: #999999; font-style: italic">// and here. Assume 16 by default</span>
+            <span style="color: #d0d0d0">ICONDIRENTRY.addChild(</span><span style="color: #6ab825; font-weight: bold">new</span> <span style="color: #d0d0d0">Int8(</span>
+                    <span style="color: #d0d0d0">{</span><span style="color: #ed9d13">&#39;root&#39;</span><span style="color: #d0d0d0">:</span> <span style="color: #d0d0d0">ICON,</span>
+                    <span style="color: #ed9d13">&#39;name&#39;</span><span style="color: #d0d0d0">:</span> <span style="color: #ed9d13">&#39;bWidth&#39;</span><span style="color: #d0d0d0">,</span>
+                    <span style="color: #ed9d13">&#39;default&#39;</span><span style="color: #d0d0d0">:</span> <span style="color: #3677a9">16</span> <span style="color: #d0d0d0">}</span>
+            <span style="color: #d0d0d0">));</span>
+        
+            <span style="color: #999999; font-style: italic">// same as above, but height</span>
+            <span style="color: #d0d0d0">ICONDIRENTRY.addChild(</span><span style="color: #6ab825; font-weight: bold">new</span> <span style="color: #d0d0d0">Int8(</span>
+                    <span style="color: #d0d0d0">{</span><span style="color: #ed9d13">&#39;root&#39;</span><span style="color: #d0d0d0">:</span> <span style="color: #d0d0d0">ICON,</span>
+                    <span style="color: #ed9d13">&#39;name&#39;</span><span style="color: #d0d0d0">:</span> <span style="color: #ed9d13">&#39;bHeight&#39;</span><span style="color: #d0d0d0">,</span>
+                    <span style="color: #ed9d13">&#39;default&#39;</span><span style="color: #d0d0d0">:</span> <span style="color: #3677a9">16</span> <span style="color: #d0d0d0">}</span>
+            <span style="color: #d0d0d0">));</span>
+        
+            <span style="color: #999999; font-style: italic">// these elements are unused and</span>
+            <span style="color: #999999; font-style: italic">// hence set to constant values</span>
+            <span style="color: #d0d0d0">ICONDIRENTRY.addChild(</span><span style="color: #6ab825; font-weight: bold">new</span> <span style="color: #d0d0d0">Int8(</span>
+                    <span style="color: #d0d0d0">{</span><span style="color: #ed9d13">&#39;root&#39;</span><span style="color: #d0d0d0">:</span> <span style="color: #d0d0d0">ICON,</span>
+                     <span style="color: #ed9d13">&#39;name&#39;</span><span style="color: #d0d0d0">:</span> <span style="color: #ed9d13">&#39;bColorCount&#39;</span><span style="color: #d0d0d0">,</span>
+                     <span style="color: #ed9d13">&#39;constant&#39;</span><span style="color: #d0d0d0">:</span> <span style="color: #3677a9">0</span><span style="color: #d0d0d0">}</span>
+            <span style="color: #d0d0d0">));</span>
+        
+            <span style="color: #d0d0d0">ICONDIRENTRY.addChild(</span><span style="color: #6ab825; font-weight: bold">new</span> <span style="color: #d0d0d0">Int8(</span>
+                    <span style="color: #d0d0d0">{</span><span style="color: #ed9d13">&#39;root&#39;</span><span style="color: #d0d0d0">:</span> <span style="color: #d0d0d0">ICON,</span>
+                     <span style="color: #ed9d13">&#39;name&#39;</span><span style="color: #d0d0d0">:</span> <span style="color: #ed9d13">&#39;bReserved&#39;</span><span style="color: #d0d0d0">,</span>
+                     <span style="color: #ed9d13">&#39;constant&#39;</span><span style="color: #d0d0d0">:</span> <span style="color: #3677a9">0</span><span style="color: #d0d0d0">}</span>
+            <span style="color: #d0d0d0">));</span>
+            
+            <span style="color: #999999; font-style: italic">// the number of bitmap planes</span>
+            <span style="color: #999999; font-style: italic">// in this icon image</span>
+            <span style="color: #d0d0d0">ICONDIRENTRY.addChild(</span><span style="color: #6ab825; font-weight: bold">new</span> <span style="color: #d0d0d0">Int16(</span>
+                    <span style="color: #d0d0d0">{</span><span style="color: #ed9d13">&#39;root&#39;</span><span style="color: #d0d0d0">:</span> <span style="color: #d0d0d0">ICON,</span>
+                     <span style="color: #ed9d13">&#39;name&#39;</span><span style="color: #d0d0d0">:</span> <span style="color: #ed9d13">&#39;wPlanes&#39;</span><span style="color: #d0d0d0">,</span>
+                     <span style="color: #ed9d13">&#39;default&#39;</span><span style="color: #d0d0d0">:</span> <span style="color: #3677a9">1</span><span style="color: #d0d0d0">}</span>
+            <span style="color: #d0d0d0">));</span>
+            
+            <span style="color: #999999; font-style: italic">// the color depth of the icon.</span>
+            <span style="color: #999999; font-style: italic">// once again, this duplicates </span>
+            <span style="color: #999999; font-style: italic">// what is specified in the bitmap info</span>
+            <span style="color: #d0d0d0">ICONDIRENTRY.addChild(</span><span style="color: #6ab825; font-weight: bold">new</span> <span style="color: #d0d0d0">Int16(</span>
+                    <span style="color: #d0d0d0">{</span><span style="color: #ed9d13">&#39;root&#39;</span><span style="color: #d0d0d0">:</span> <span style="color: #d0d0d0">ICON,</span>
+                     <span style="color: #ed9d13">&#39;name&#39;</span><span style="color: #d0d0d0">:</span> <span style="color: #ed9d13">&#39;wBitCount&#39;</span><span style="color: #d0d0d0">,</span>
+                     <span style="color: #ed9d13">&#39;values&#39;</span><span style="color: #d0d0d0">:</span> <span style="color: #d0d0d0">[</span><span style="color: #3677a9">1</span><span style="color: #d0d0d0">,</span><span style="color: #3677a9">2</span><span style="color: #d0d0d0">,</span><span style="color: #3677a9">4</span><span style="color: #d0d0d0">,</span><span style="color: #3677a9">8</span><span style="color: #d0d0d0">,</span><span style="color: #3677a9">16</span><span style="color: #d0d0d0">,</span><span style="color: #3677a9">24</span><span style="color: #d0d0d0">,</span><span style="color: #3677a9">32</span><span style="color: #d0d0d0">]}</span>
+            <span style="color: #d0d0d0">));</span>
+        
+            <span style="color: #999999; font-style: italic">// the size of an icon metadata entry.</span>
+            <span style="color: #999999; font-style: italic">// This references an array entry of the</span>
+            <span style="color: #999999; font-style: italic">// icon image array.</span>
+            <span style="color: #999999; font-style: italic">// The %n in the target will be expanded to the </span>
+            <span style="color: #999999; font-style: italic">// array element that we are calculating the </span>
+            <span style="color: #999999; font-style: italic">// target of</span>
+            <span style="color: #d0d0d0">ICONDIRENTRY.addChild(</span><span style="color: #6ab825; font-weight: bold">new</span> <span style="color: #d0d0d0">IntSize(</span>
+                    <span style="color: #d0d0d0">{</span><span style="color: #ed9d13">&#39;root&#39;</span><span style="color: #d0d0d0">:</span> <span style="color: #d0d0d0">ICON,</span>
+                     <span style="color: #ed9d13">&#39;name&#39;</span><span style="color: #d0d0d0">:</span> <span style="color: #ed9d13">&#39;dwBytesInRes&#39;</span><span style="color: #d0d0d0">,</span>
+                     <span style="color: #ed9d13">&#39;nofuzz&#39;</span><span style="color: #d0d0d0">:</span> <span style="color: #6ab825; font-weight: bold">true</span><span style="color: #d0d0d0">,</span>
+                     <span style="color: #ed9d13">&#39;bytesize&#39;</span><span style="color: #d0d0d0">:</span> <span style="color: #3677a9">4</span><span style="color: #d0d0d0">,</span>
+                     <span style="color: #ed9d13">&#39;target&#39;</span><span style="color: #d0d0d0">:</span> <span style="color: #ed9d13">&quot;ICON.ICONIMAGE[%n]&quot;</span><span style="color: #d0d0d0">}</span>
+            <span style="color: #d0d0d0">));</span>
+        
+            <span style="color: #999999; font-style: italic">// This is where the image data will be </span>
+            <span style="color: #999999; font-style: italic">// located in the file. </span>
+            <span style="color: #999999; font-style: italic">// The IntOffset type is used to calculate</span>
+            <span style="color: #999999; font-style: italic">// field offsets in relation to all of the</span>
+            <span style="color: #999999; font-style: italic">// other fields.</span>
+            <span style="color: #d0d0d0">ICONDIRENTRY.addChild(</span><span style="color: #6ab825; font-weight: bold">new</span> <span style="color: #d0d0d0">IntOffset(</span>
+                    <span style="color: #d0d0d0">{</span><span style="color: #ed9d13">&#39;root&#39;</span><span style="color: #d0d0d0">:</span> <span style="color: #d0d0d0">ICON,</span>
+                     <span style="color: #ed9d13">&#39;name&#39;</span><span style="color: #d0d0d0">:</span> <span style="color: #ed9d13">&#39;dwImageOffset&#39;</span><span style="color: #d0d0d0">,</span>
+                     <span style="color: #ed9d13">&#39;nofuzz&#39;</span><span style="color: #d0d0d0">:</span> <span style="color: #6ab825; font-weight: bold">true</span><span style="color: #d0d0d0">,</span>
+                     <span style="color: #ed9d13">&#39;bytesize&#39;</span><span style="color: #d0d0d0">:</span> <span style="color: #3677a9">4</span><span style="color: #d0d0d0">,</span>
+                     <span style="color: #ed9d13">&#39;target&#39;</span><span style="color: #d0d0d0">:</span> <span style="color: #ed9d13">&quot;ICON.ICONIMAGE[%n]&quot;</span><span style="color: #d0d0d0">}</span>
+            <span style="color: #d0d0d0">));</span>
+        
+            <span style="color: #999999; font-style: italic">// the icon directory entry</span>
+            <span style="color: #6ab825; font-weight: bold">var</span> <span style="color: #d0d0d0">ICONDIR</span> <span style="color: #d0d0d0">=</span> <span style="color: #6ab825; font-weight: bold">new</span> <span style="color: #d0d0d0">Container(</span>
+                <span style="color: #d0d0d0">{</span><span style="color: #ed9d13">&#39;root&#39;</span><span style="color: #d0d0d0">:</span> <span style="color: #d0d0d0">ICON,</span>
+                 <span style="color: #ed9d13">&#39;name&#39;</span><span style="color: #d0d0d0">:</span> <span style="color: #ed9d13">&#39;ICONDIR&#39;</span><span style="color: #d0d0d0">}</span>
+                <span style="color: #d0d0d0">);</span>
+        
+            <span style="color: #999999; font-style: italic">// a reserved magic number, set </span>
+            <span style="color: #999999; font-style: italic">// to zero</span>
+            <span style="color: #d0d0d0">ICONDIR.addChild(</span> <span style="color: #6ab825; font-weight: bold">new</span> <span style="color: #d0d0d0">Int16(</span>
+                <span style="color: #d0d0d0">{</span><span style="color: #ed9d13">&#39;root&#39;</span><span style="color: #d0d0d0">:</span> <span style="color: #d0d0d0">ICON,</span>
+                 <span style="color: #ed9d13">&#39;name&#39;</span><span style="color: #d0d0d0">:</span> <span style="color: #ed9d13">&#39;idReserved&#39;</span><span style="color: #d0d0d0">,</span>
+                 <span style="color: #ed9d13">&#39;constant&#39;</span><span style="color: #d0d0d0">:</span> <span style="color: #3677a9">0</span><span style="color: #d0d0d0">}</span>
+            <span style="color: #d0d0d0">));</span>
+        
+            <span style="color: #999999; font-style: italic">// the type of icon. The type 1</span>
+            <span style="color: #999999; font-style: italic">// is reserved for icons</span>
+            <span style="color: #d0d0d0">ICONDIR.addChild(</span> <span style="color: #6ab825; font-weight: bold">new</span> <span style="color: #d0d0d0">Int16(</span>
+                    <span style="color: #d0d0d0">{</span><span style="color: #ed9d13">&#39;root&#39;</span><span style="color: #d0d0d0">:</span> <span style="color: #d0d0d0">ICON,</span>
+                     <span style="color: #ed9d13">&#39;name&#39;</span><span style="color: #d0d0d0">:</span> <span style="color: #ed9d13">&#39;idType&#39;</span><span style="color: #d0d0d0">,</span>
+                     <span style="color: #ed9d13">&#39;constant&#39;</span><span style="color: #d0d0d0">:</span> <span style="color: #3677a9">1</span><span style="color: #d0d0d0">}</span>
+            <span style="color: #d0d0d0">));</span>
+        
+            <span style="color: #999999; font-style: italic">// how many images are in this icon file?</span>
+            <span style="color: #d0d0d0">ICONDIR.addChild(</span> <span style="color: #6ab825; font-weight: bold">new</span> <span style="color: #d0d0d0">Int16(</span>
+                    <span style="color: #d0d0d0">{</span><span style="color: #ed9d13">&#39;root&#39;</span><span style="color: #d0d0d0">:</span> <span style="color: #d0d0d0">ICON,</span>
+                     <span style="color: #ed9d13">&#39;name&#39;</span><span style="color: #d0d0d0">:</span> <span style="color: #ed9d13">&#39;idCount&#39;</span><span style="color: #d0d0d0">,</span>
+                     <span style="color: #ed9d13">&#39;values&#39;</span><span style="color: #d0d0d0">:</span> <span style="color: #d0d0d0">[</span><span style="color: #3677a9">1</span><span style="color: #d0d0d0">,</span> <span style="color: #3677a9">64</span><span style="color: #d0d0d0">,</span> <span style="color: #3677a9">0xFF</span><span style="color: #d0d0d0">,</span> <span style="color: #3677a9">0xFFF</span><span style="color: #d0d0d0">]}</span>
+            <span style="color: #d0d0d0">));</span>
+        
+            <span style="color: #999999; font-style: italic">// link all the structures to the top level</span>
+            <span style="color: #999999; font-style: italic">// container</span>
+            <span style="color: #d0d0d0">ICONDIR.addChild(ICONDIRENTRY);</span>
+            <span style="color: #d0d0d0">ICON.addChild(ICONDIR);</span>
+            <span style="color: #d0d0d0">ICON.addChild(ICONIMAGE);</span>
+        
+            <span style="color: #999999; font-style: italic">// icon struture is ready</span>
+            <span style="color: #6ab825; font-weight: bold">return</span> <span style="color: #d0d0d0">ICON;</span>
+        <span style="color: #d0d0d0">}</span> <span style="color: #999999; font-style: italic">// makeNewIcon</span>
+        
+        
+        <span style="color: #6ab825; font-weight: bold">function</span> <span style="color: #d0d0d0">fuzzAnIcon(fuzzesBeforeReload,</span> <span style="color: #d0d0d0">specificCombo)</span> <span style="color: #d0d0d0">{</span>
+        
+            <span style="color: #6ab825; font-weight: bold">if</span><span style="color: #d0d0d0">(should_fuzz</span> <span style="color: #d0d0d0">===</span> <span style="color: #6ab825; font-weight: bold">false</span><span style="color: #d0d0d0">)</span> <span style="color: #d0d0d0">{</span>
+                <span style="color: #6ab825; font-weight: bold">return</span><span style="color: #d0d0d0">;</span>
+            <span style="color: #d0d0d0">}</span>
+        
+            <span style="color: #999999; font-style: italic">// Get an icon structure definition</span>
+            <span style="color: #6ab825; font-weight: bold">var</span> <span style="color: #d0d0d0">icon</span> <span style="color: #d0d0d0">=</span> <span style="color: #d0d0d0">makeNewIcon();</span>
+            <span style="color: #999999; font-style: italic">// How many combinations are there?</span>
+            <span style="color: #6ab825; font-weight: bold">var</span> <span style="color: #d0d0d0">combos</span> <span style="color: #d0d0d0">=</span> <span style="color: #d0d0d0">icon.Combos();</span>
+            <span style="color: #d0d0d0">myLog(</span><span style="color: #ed9d13">&quot;icon Combos: &quot;</span> <span style="color: #d0d0d0">+</span> <span style="color: #d0d0d0">combos);</span>
+            <span style="color: #999999; font-style: italic">// pick a random combination to instantiate</span>
+            <span style="color: #6ab825; font-weight: bold">var</span> <span style="color: #d0d0d0">randcombo</span> <span style="color: #d0d0d0">=</span> <span style="color: #24909d">Math</span><span style="color: #d0d0d0">.floor(</span><span style="color: #24909d">Math</span><span style="color: #d0d0d0">.oldrandom()</span> <span style="color: #d0d0d0">*</span> <span style="color: #d0d0d0">(combos));</span>
+        
+            <span style="color: #999999; font-style: italic">// this is here in case this code would be needed</span>
+            <span style="color: #999999; font-style: italic">// to reproduce a specific fuzz case</span>
+            <span style="color: #6ab825; font-weight: bold">if</span><span style="color: #d0d0d0">(specificCombo</span> <span style="color: #d0d0d0">===</span> <span style="color: #6ab825; font-weight: bold">undefined</span><span style="color: #d0d0d0">)</span>
+            <span style="color: #d0d0d0">{</span>
+                <span style="color: #d0d0d0">myLog(</span><span style="color: #ed9d13">&quot;Trying combo: &quot;</span> <span style="color: #d0d0d0">+</span> <span style="color: #d0d0d0">randcombo);</span>
+                <span style="color: #d0d0d0">icon.Distribute(randcombo,</span> <span style="color: #3677a9">0</span><span style="color: #d0d0d0">);</span>
+            <span style="color: #d0d0d0">}</span>
+            <span style="color: #6ab825; font-weight: bold">else</span> 
+            <span style="color: #d0d0d0">{</span>
+                <span style="color: #999999; font-style: italic">// the Distribute call populates each element of the</span>
+                <span style="color: #999999; font-style: italic">// icon structure with its combination number</span>
+                <span style="color: #d0d0d0">myLog(</span><span style="color: #ed9d13">&quot;Trying combo: &quot;</span> <span style="color: #d0d0d0">+</span> <span style="color: #d0d0d0">specificCombo);</span>
+                <span style="color: #d0d0d0">icon.Distribute(specificCombo,</span> <span style="color: #3677a9">0</span><span style="color: #d0d0d0">);</span>
+            <span style="color: #d0d0d0">}</span>
+        
+            <span style="color: #d0d0d0">myLog(</span><span style="color: #ed9d13">&quot;Icon Size: &quot;</span> <span style="color: #d0d0d0">+</span> <span style="color: #d0d0d0">icon.Size());</span>
+            <span style="color: #d0d0d0">console.log(</span><span style="color: #ed9d13">&quot;About to calculate value&quot;</span><span style="color: #d0d0d0">);</span>
+            <span style="color: #999999; font-style: italic">// actually generate the data that correspons</span>
+            <span style="color: #999999; font-style: italic">// to the specific combination</span>
+            <span style="color: #6ab825; font-weight: bold">var</span> <span style="color: #d0d0d0">ic</span> <span style="color: #d0d0d0">=</span> <span style="color: #d0d0d0">icon.Value();</span>
+            <span style="color: #999999; font-style: italic">// and convert it to a base64 url</span>
+            <span style="color: #6ab825; font-weight: bold">var</span> <span style="color: #d0d0d0">iconb64</span> <span style="color: #d0d0d0">=</span> <span style="color: #ed9d13">&quot;data:image/x-icon;base64,&quot;</span> <span style="color: #d0d0d0">+</span> <span style="color: #24909d">window</span><span style="color: #d0d0d0">.btoa(ic);</span>
+            <span style="color: #d0d0d0">ic</span> <span style="color: #d0d0d0">=</span> <span style="color: #ed9d13">&quot;&quot;</span><span style="color: #d0d0d0">;</span>
+        
+            <span style="color: #999999; font-style: italic">// taken from:</span>
+            <span style="color: #999999; font-style: italic">// http://stackoverflow.com/questions/260857/changing-website-favicon-dynamically</span>
+            <span style="color: #999999; font-style: italic">//</span>
+            <span style="color: #d0d0d0">drawPreview(iconb64);</span>
+            <span style="color: #999999; font-style: italic">// Google Chrome will kill the renderer process if a URL </span>
+            <span style="color: #999999; font-style: italic">// length is &gt; kMaxURLChars, which is 2MB in newer</span>
+            <span style="color: #999999; font-style: italic">// Chrome builds.</span>
+            <span style="color: #6ab825; font-weight: bold">var</span> <span style="color: #d0d0d0">is_chrome</span> <span style="color: #d0d0d0">=</span> <span style="color: #ed9d13">/chrome/</span><span style="color: #d0d0d0">.test(navigator.userAgent.toLowerCase());</span> 
+            <span style="color: #6ab825; font-weight: bold">var</span> <span style="color: #d0d0d0">kMaxURLChars</span> <span style="color: #d0d0d0">=</span> <span style="color: #3677a9">2</span> <span style="color: #d0d0d0">*</span> <span style="color: #3677a9">1024</span> <span style="color: #d0d0d0">*</span> <span style="color: #3677a9">1024</span><span style="color: #d0d0d0">;</span>
+            <span style="color: #6ab825; font-weight: bold">if</span><span style="color: #d0d0d0">(is_chrome</span> <span style="color: #d0d0d0">&amp;&amp;</span> <span style="color: #d0d0d0">iconb64.length</span> <span style="color: #d0d0d0">&gt;=</span> <span style="color: #d0d0d0">kMaxURLChars)</span> <span style="color: #d0d0d0">{</span>
+                <span style="color: #d0d0d0">myLog(</span><span style="color: #ed9d13">&quot;Icon Would Kill Chrome Renderer, not setting...&quot;</span><span style="color: #d0d0d0">);</span>
+            <span style="color: #d0d0d0">}</span> <span style="color: #6ab825; font-weight: bold">else</span> <span style="color: #d0d0d0">{</span>
+                <span style="color: #d0d0d0">changeFavicon(iconb64);</span>
+                <span style="color: #d0d0d0">myLog(</span><span style="color: #ed9d13">&quot;Icon Set...&quot;</span><span style="color: #d0d0d0">);</span>
+            <span style="color: #d0d0d0">}</span>
+            <span style="color: #d0d0d0">iconb64</span> <span style="color: #d0d0d0">=</span> <span style="color: #ed9d13">&quot;&quot;</span><span style="color: #d0d0d0">;</span>
+            <span style="color: #999999; font-style: italic">// This was my attempt at removing references to help garbage collectors</span>
+            <span style="color: #999999; font-style: italic">// make this script hog less memory</span>
+            <span style="color: #d0d0d0">icon.HelpGC();</span>
+        
+            <span style="color: #6ab825; font-weight: bold">if</span><span style="color: #d0d0d0">(fuzzesBeforeReload</span> <span style="color: #d0d0d0">===</span> <span style="color: #6ab825; font-weight: bold">undefined</span><span style="color: #d0d0d0">)</span> <span style="color: #d0d0d0">{</span>
+                <span style="color: #6ab825; font-weight: bold">return</span><span style="color: #d0d0d0">;</span>
+            <span style="color: #d0d0d0">}</span>
+        
+            <span style="color: #999999; font-style: italic">// normally a new fuzz case will be run after an icon</span>
+            <span style="color: #999999; font-style: italic">// is rendered, or fails to render, but sometimes</span>
+            <span style="color: #999999; font-style: italic">// none of the callbacks will be called. This ensures</span>
+            <span style="color: #999999; font-style: italic">// that a new fuzz iteration restarts</span>
+            <span style="color: #6ab825; font-weight: bold">if</span><span style="color: #d0d0d0">(fuzzesBeforeReload</span> <span style="color: #d0d0d0">==</span> <span style="color: #3677a9">0</span><span style="color: #d0d0d0">)</span> <span style="color: #d0d0d0">{</span>
+                <span style="color: #d0d0d0">setTimeout(</span><span style="color: #ed9d13">&#39;location.reload(true)&#39;</span><span style="color: #d0d0d0">,</span> <span style="color: #3677a9">2000</span><span style="color: #d0d0d0">);</span>
+            <span style="color: #d0d0d0">}</span> <span style="color: #6ab825; font-weight: bold">else</span> <span style="color: #d0d0d0">{</span>
+                <span style="color: #d0d0d0">fuzzesBeforeReload</span> <span style="color: #d0d0d0">-=</span> <span style="color: #3677a9">1</span><span style="color: #d0d0d0">;</span>
+                <span style="color: #d0d0d0">setTimeout(</span><span style="color: #ed9d13">&#39;fuzzAnIcon(&#39;</span> <span style="color: #d0d0d0">+</span> <span style="color: #d0d0d0">fuzzesBeforeReload.toString()</span> <span style="color: #d0d0d0">+</span> <span style="color: #ed9d13">&#39;)&#39;</span><span style="color: #d0d0d0">,</span> <span style="color: #3677a9">2000</span><span style="color: #d0d0d0">);</span>
+            <span style="color: #d0d0d0">}</span>
+        <span style="color: #d0d0d0">}</span>
+        
+        <span style="color: #d0d0d0">--&gt;</span>
+<span style="color: #6ab825; font-weight: bold">&lt;/script&gt;</span>
+</pre></div>
+
+<br/>
+<br/>
+<h1 id="examplecode">License</h1> 
+Binfuzz.js is licensed under the <a href="http://opensource.org/licenses/MIT">MIT License</a>:
+<br/>
+
+<pre>
+Copyright (c) 2013 Artem Dinaburg
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+THE SOFTWARE.
+</pre>
+
+
+		</div>
+		<div style='clear: both;'></div>
+</div>
+</div>
+
+
+</div>
+</div>
+</div></div>
+</div>
+</div>
+</div>
+<!-- columns -->
+</div>
+<!-- main -->
+</div>
+</div>
+</div>
+</div>
+</div>
+</body>
+</html>

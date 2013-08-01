@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html>
+<head>
+</head>
+<body>
+		This file exists solely to make it easier to understand what the icon
+		fuzzing demo is doing. 
+		<br/>
+		The code shold be closely identical to bh_arsenal_2013.html, 
+		but without any extraneous information.
+		<br/>
+		And it starts fuzzing automatically, but you probably already noticed
+		<br/>
+		<br/>
+		<canvas width="128" height="128" style="border: 1px solid black; width: 128px; height: 128px; display: block; margin-left: auto; margin-right: auto;" id="iconpreview"></canvas>
+		<br/>
+		<br/>
+		<input type="text" id="combonum" /><input type="button" value="Reproduce Testcase" onclick="fuzzAnIcon(undefined, document.getElementById('combonum').value);" />
+		<br/>
+		<br/>
+		<textarea id="textlog" style="width: 80%; height: 200px; display: block; margin-left: auto; margin-right: auto;"></textarea>
+		<div id="log"></div>
+		<script language="JavaScript" src="../base64.js"></script>
+		<script language="JavaScript" src="../BinaryParser.js"></script>
+		<script language="JavaScript">
+		<!--
+				Math['oldrandom'] = Math.random;
+		-->
+		</script>
+		<script language="JavaScript" src="../seedrandom-min.js"></script>
+		<script language="JavaScript" src="../binfuzz.js"></script>
+		<script language="JavaScript">
+		<!--
+				if (!window.btoa) window.btoa = base64.encode;
+		    if (!window.atob) window.atob = base64.decode;
+
+				function changeFavicon(src) {
+						document.head || (document.head = document.getElementsByTagName('head')[0]);
+						var link = document.createElement('link'),
+								oldLink = document.getElementById('dynamic-favicon');
+						link.id = 'dynamic-favicon';
+						link.rel = 'icon';
+						link.href = src;
+						if (oldLink) {
+								document.head.removeChild(oldLink);
+						}
+						document.head.appendChild(link);
+				}
+
+				function drawPreview(datalink) {
+						var canvas = document.getElementById('iconpreview');
+						context = canvas.getContext('2d');
+
+						var oldw = canvas.width;
+						canvas.width = 1;
+						canvas.width = oldw;
+
+						icon_preview = new Image();
+						icon_preview.src = datalink;
+						icon_preview.onload = function() {
+								context.drawImage(icon_preview, 128/2-8, 128/2-8);
+								delete this.src;
+						};
+				}
+
+				function myLog(msg)
+				{
+						var val = document.getElementById('textlog').value;
+						document.getElementById('textlog').value =  msg + "\n" + val;
+				}
+
+
+				function makeNewIcon() {
+						var ICON = new Container({'name': 'ICON'});
+
+						var tagBITMAPINFOHEADER = new Container(
+										{'root': ICON,
+										 'name': 'tagBITMAPINFOHEADER'}
+								);
+
+								tagBITMAPINFOHEADER.addChild( new IntSize(
+										{'root': ICON,
+										'name': 'biSize',
+										'bytesize': 4, 
+										'nofuzz': true,
+										'signed': true,
+										'target': tagBITMAPINFOHEADER}
+								));
+
+								tagBITMAPINFOHEADER.addChild( new Int32(
+										{'root': ICON,
+										'name': 'biWidth', 
+										'values': [0, 1, 3, 16, 32, 64, 129, 0xFF, 0xFFF, 0xFFFE, 0xFFFF]}
+								));
+
+								tagBITMAPINFOHEADER.addChild( new Int32(
+										{'root': ICON,
+										 'name': 'biHeight',
+										'values': [0, 1, 3, 16, 32, 64, 129, 0x101, 0x1001, 0xFFFE, 0xFFFF]}
+								 ));
+
+								tagBITMAPINFOHEADER.addChild( new UInt16(
+										{'root': ICON,
+										'name': 'biPlanes',
+										'default': 1}
+								));
+
+								tagBITMAPINFOHEADER.addChild( new UInt16(
+										{'root': ICON,
+										 'name': 'biBitCount',
+										 'values': [1,2,4,8,16,24,32]}
+								));
+
+								tagBITMAPINFOHEADER.addChild( new UInt32(
+										{'root': ICON,
+										 'name': 'biCompression',
+										 'values': [0,1,2,3,6]}
+								));
+
+								tagBITMAPINFOHEADER.addChild( new IntSize(
+										{'root': ICON,
+										'name': 'biSizeImage',
+										'bytesize': 4,
+										'nofuzz': true,
+										'signed': true,
+										'target': tagBITMAPINFOHEADER,
+										'calcfunc': function(target, combo) {
+												var width = target.getChild('biWidth').NativeValue();	
+												var height = target.getChild('biHeight').NativeValue();
+												var planes = target.getChild('biPlanes').NativeValue();
+												var bpp = target.getChild('biBitCount').NativeValue();
+
+												// size of OR mask
+												var tmp1 = width * planes * bpp + 31;
+												var tmp2 = (tmp1 & ~31) / 8;
+												var tmp3 = tmp2 * height / 2;
+
+												// size of AND mask
+												var and1 = width * planes * 1 + 31;
+												var and2 = (and1 & ~31) / 8;
+												var and3 = and2 * height / 2;
+
+												tmp3 += and3;
+
+												return tmp3;
+												}
+										}
+								));
+
+								tagBITMAPINFOHEADER.addChild( new Int32(
+										{'root': ICON,
+										'name': 'biXPelsPerMeter',
+										'constant': 0}
+								));
+								tagBITMAPINFOHEADER.addChild( new Int32(
+										{'root': ICON,
+										'name': 'biYPelsPerMeter',
+										'constant': 0}
+								));
+								tagBITMAPINFOHEADER.addChild( new UInt32(
+										{'root': ICON,
+										'name': 'biClrUsed',
+										'constant': 0}
+								));
+								tagBITMAPINFOHEADER.addChild( new UInt32(
+										{'root': ICON,
+										'name': 'biClrImportant',
+										'constant': 0}
+								));
+
+						var ICONIMAGE = new ArrayContainer(
+								{'root': ICON,
+								 'name': 'ICONIMAGE',
+								 'count': 'ICON.ICONDIR.idCount'}
+								);
+
+								ICONIMAGE.addChild(tagBITMAPINFOHEADER);
+								ICONIMAGE.addChild(new Blob(
+										{'root': ICON,
+										 'name': 'icColors',
+										 'length': 0,
+										 'blob': ""}
+								));
+
+								ICONIMAGE.addChild(new Blob(
+										{'root': ICON,
+										 'name': 'icXOR',
+										 'generator': makeRandomString,
+										 'length': function (seed, parent, root) {
+										    var bih = parent.getChild('tagBITMAPINFOHEADER');
+												var width = bih.getChild('biWidth').NativeValue();
+												var height = bih.getChild('biHeight').NativeValue() / 2;
+												var bpp = bih.getChild('biBitCount').NativeValue();
+												var planes = bih.getChild('biPlanes').NativeValue();
+
+												var stride = (( width * planes * bpp + 31) & ~31) / 8;
+												var thislen = stride * height;
+
+												
+												var blobsize = thislen;
+												//console.log("Blob: " + this.name + ", size: " + blobsize);
+												// sanity check. we are not about to generate gigabytes of
+												// icon data
+												if(blobsize < 0 || blobsize > 0xFFFFF) {
+														blobsize = 0xFFFFF;
+												}
+												return blobsize;
+												}
+										}
+								));
+
+								ICONIMAGE.addChild(new Blob(
+										{'root': ICON,
+										'name': 'icAND',
+										 'generator': makeRandomString,
+										 'length': function (seed, parent, root)
+										 {
+										    var bih = parent.getChild('tagBITMAPINFOHEADER');
+												var width = bih.getChild('biWidth').NativeValue();
+												var height = bih.getChild('biHeight').NativeValue() / 2;
+												var planes = bih.getChild('biPlanes').NativeValue();
+
+
+												var stride = (( width * planes * 1 + 31) & ~31) / 8;
+												var thislen = stride * height;
+
+												//console.log("Blob: " + this.name + ", size: " + thislen);
+												// sanity check. we are not about to generate gigabytes of
+												// icon data, even if I really want to
+												if(thislen < 0 || thislen > 0xFFFFF) {
+														thislen = 0xFFFFF;
+												}
+												return thislen;
+										 } 
+										 }
+								));
+
+
+						var ICONDIRENTRY = new ArrayContainer(
+								{'root': ICON,
+								 'name': 'idEntries',
+								 'count': 'ICON.ICONDIR.idCount',
+								 'indexer': '%n'}
+								);
+								ICONDIRENTRY.addChild(new Int8(
+										{'root': ICON,
+										'name': 'bWidth',
+										'default': 16 }
+								));
+								ICONDIRENTRY.addChild(new Int8(
+										{'root': ICON,
+										'name': 'bHeight',
+										'default': 16 }
+								));
+								ICONDIRENTRY.addChild(new Int8(
+										{'root': ICON,
+										 'name': 'bColorCount',
+										 'constant': 0}
+								));
+								ICONDIRENTRY.addChild(new Int8(
+										{'root': ICON,
+										 'name': 'bReserved',
+										 'constant': 0}
+								));
+								ICONDIRENTRY.addChild(new Int16(
+										{'root': ICON,
+										 'name': 'wPlanes',
+										 'default': 1}
+								));
+								ICONDIRENTRY.addChild(new Int16(
+										{'root': ICON,
+										 'name': 'wBitCount',
+										 'values': [1,2,4,8,16,24,32]}
+								));
+
+								ICONDIRENTRY.addChild(new IntSize(
+										{'root': ICON,
+										 'name': 'dwBytesInRes',
+										 'nofuzz': true,
+										 'bytesize': 4,
+										 'target': "ICON.ICONIMAGE[%n]"}
+								));
+								ICONDIRENTRY.addChild(new IntOffset(
+										{'root': ICON,
+										 'name': 'dwImageOffset',
+										 'nofuzz': true,
+										 'bytesize': 4,
+										 'target': "ICON.ICONIMAGE[%n]"}
+								));
+
+						var ICONDIR = new Container(
+								{'root': ICON,
+								 'name': 'ICONDIR'}
+						);
+								ICONDIR.addChild( new Int16(
+										{'root': ICON,
+										 'name': 'idReserved',
+										 'constant': 0}
+								));
+
+								ICONDIR.addChild( new Int16(
+										{'root': ICON,
+										 'name': 'idType',
+										 'constant': 1}
+								));
+								ICONDIR.addChild( new Int16(
+										{'root': ICON,
+										 'name': 'idCount',
+										 'values': [1, 64, 0xFF, 0xFFF]}
+								));
+								ICONDIR.addChild(ICONDIRENTRY);
+
+								ICON.addChild(ICONDIR);
+								ICON.addChild(ICONIMAGE);
+		    return ICON;
+				} // makeNewIcon
+
+
+				function fuzzAnIcon(fuzzesBeforeReload, specificCombo) {
+						var icon = makeNewIcon();
+						var combos = icon.Combos();
+						myLog("icon Combos: " + combos);
+						var randcombo = Math.floor(Math.oldrandom() * (combos));
+
+						if(specificCombo === undefined)
+						{
+								myLog("Trying combo: " + randcombo);
+								icon.Distribute(randcombo, 0);
+						}
+						else 
+						{
+								myLog("Trying combo: " + specificCombo);
+								icon.Distribute(specificCombo, 0);
+						}
+
+						myLog("icon Size: " + icon.Size());
+						console.log("About to calculate value");
+						var ic = icon.Value();
+						var iconb64 = "data:image/x-icon;base64," + window.btoa(ic);
+						ic = "";
+
+						// taken from:
+						// http://stackoverflow.com/questions/260857/changing-website-favicon-dynamically
+						//
+						drawPreview(iconb64);
+						var is_chrome = /chrome/.test(navigator.userAgent.toLowerCase()); 
+						var kMaxURLChars = 2 * 1024 * 1024;
+						if(is_chrome && iconb64.length >= kMaxURLChars) {
+								myLog("Icon Would Kill Renderer, not setting...");
+						} else {
+								changeFavicon(iconb64);
+								myLog("Icon Set...");
+						}
+						iconb64 = "";
+						icon.HelpGC();
+
+						if(fuzzesBeforeReload === undefined) {
+								return;
+						}
+
+						if(fuzzesBeforeReload == 0) {
+								setTimeout('location.reload(true)', 2000);
+						} else {
+								fuzzesBeforeReload -= 1;
+								setTimeout('fuzzAnIcon(' + fuzzesBeforeReload.toString() + ')', 2000);
+						}
+				}
+
+				fuzzAnIcon(10);
+		-->
+		</script>
+</body>
+</html>
